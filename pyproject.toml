@@ -15,7 +15,8 @@ dependencies = [
     "redis (>=7.4.0,<8.0.0)",
     "ipython (>=9.13.0,<10.0.0)",
     "django-crispy-forms (>=2.6,<3.0)",
-    "crispy-bootstrap5 (>=2026.3,<2027.0)"
+    "crispy-bootstrap5 (>=2026.3,<2027.0)",
+    "django-stubs (>=6.0.4,<7.0.0)"
 ]
 
 
