@@ -4,5 +4,5 @@ from . import views
 app_name = DistributionConfig.name
 
 urlpatterns = [
-    path('', views.TemplateView.as_view(), name='main'),
+    path('', views.MainView.as_view(), name='main'),
 ]
