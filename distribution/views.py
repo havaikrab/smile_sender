@@ -1,4 +1,15 @@
-from django.views.generic import TemplateView
+from django.views.generic import CreateView, TemplateView
 
-class MainView(TemplateView):
-    template_name = 'distribution/main_page.html'
+from .models import Message
+
+
+class HomeView(TemplateView):
+    """Контроллер главной страницы приложения distribution"""
+
+    template_name = "distribution/home_page.html"
+
+
+class MessageCreateView(CreateView):
+    """Контроллер создания сообщения рассылки"""
+
+    model = Message

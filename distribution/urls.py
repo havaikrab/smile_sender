@@ -1,8 +1,10 @@
-from .apps import DistributionConfig
 from django.urls import path
+
 from . import views
+from .apps import DistributionConfig
+
 app_name = DistributionConfig.name
 
 urlpatterns = [
-    path('', views.MainView.as_view(), name='main'),
+    path("", views.HomeView.as_view(), name="main"),
 ]

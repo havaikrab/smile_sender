@@ -1,0 +1,74 @@
+/* Меню авторизации */
+.sp-auth {
+    background: transparent;
+    background-size: cover;
+    border-left: 1px solid rgb(80, 200, 20);
+    border-bottom-left-radius: 20px;
+    border-bottom: 4px solid rgb(80, 200, 20);
+}
+
+
+/* Кнопки меню авторизации */
+.sp-auth-but {
+    color: brown;
+    background: rgb(150, 200, 255);
+    border-top: 1px solid rgb(50, 100, 255);
+    border-left: 3px solid rgb(50, 100, 255);
+    border-bottom: 3px solid rgb(50, 100, 255);
+    border-right: 1px solid rgb(50, 100, 255);
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-auth-but:hover {
+    box-shadow: -2px 2px 0 0 rgb(50, 100, 255);
+}
+
+
+/* Основной шрифт сайта */
+.sp-bfc {
+    color: brown;
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Фон с градиентом для базового шаблона */
+.sp-gr-bckgrnd {
+    background: linear-gradient(rgb(230, 255, 200), rgb(120, 220, 110));
+    background-attachment: fixed;
+    background-size: cover;
+    padding: 0;
+}
+
+
+/* Меню навигации */
+.sp-nav {
+    background: transparent;
+    background-size: cover;
+    border-top: 1px solid rgb(80, 200, 20);
+    border-top-right-radius: 20px;
+    border-right: 4px solid rgb(80, 200, 20);
+    border-bottom-right-radius: 20px;
+    border-bottom: 4px solid rgb(80, 200, 20);
+}
+
+
+/* Кнопки меню навигации */
+.sp-nav-but {
+    color: brown;
+    background: rgb(150, 200, 255);
+    border-top: 1px solid rgb(50, 100, 255);
+    border-left: 1px solid rgb(50, 100, 255);
+    border-bottom: 3px solid rgb(50, 100, 255);
+    border-right: 3px solid rgb(50, 100, 255);
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-nav-but:hover {
+    box-shadow: 2px 2px 0 0 rgb(50, 100, 255);
+}
+
+
