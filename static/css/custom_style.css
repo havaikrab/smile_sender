@@ -33,6 +33,18 @@
 }
 
 
+/* Рамка основного содержимого страницы */
+.sp-cont {
+    background: transparent;
+    border-left: 1px solid rgb(80, 200, 20);
+    border-top: 1px solid rgb(80, 200, 20);
+    border-right: 4px solid rgb(80, 200, 20);
+    border-bottom: 4px solid rgb(80, 200, 20);
+    border-radius: 20px;
+}
+
+
+
 /* Фон с градиентом для базового шаблона */
 .sp-gr-bckgrnd {
     background: linear-gradient(rgb(230, 255, 200), rgb(120, 220, 110));
@@ -45,7 +57,6 @@
 /* Меню навигации */
 .sp-nav {
     background: transparent;
-    background-size: cover;
     border-top: 1px solid rgb(80, 200, 20);
     border-top-right-radius: 20px;
     border-right: 4px solid rgb(80, 200, 20);
@@ -70,5 +81,3 @@
 .sp-nav-but:hover {
     box-shadow: 2px 2px 0 0 rgb(50, 100, 255);
 }
-
-
