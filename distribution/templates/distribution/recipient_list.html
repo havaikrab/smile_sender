@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block header %}
     {% include 'distribution/header.html' %}
 {% endblock %}
@@ -34,10 +36,18 @@
     </div>
     <div class="mt-5 row me-5">
         <div class="col-6">
-            <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="#">Добавить получателя</a>
-            <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="#">Загрузить список контактов</a>
+            <div class="mb-5">
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:create_single_recipient' %}">Добавить получателя</a>
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="#">Загрузить список контактов</a>
+            </div>
+            {% if form_exist %}
+                <form class="sp-cont px-5 py-4 mt-5 me-5" method="post">
+                    {% csrf_token %}
+                    {% crispy form %}
+                </form>
+            {% endif %}
         </div>
-        <div class="col-6 sp-cont">
+        <div class="col-6 sp-cont align-self-start p-3">
             <h5 class="text-center sp-bfc m-3">Excel-форма</h5>
             <ul class="text-start sp-bfc m-3">
                 <li>Скачайте данную форму</li>
