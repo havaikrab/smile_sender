@@ -9,4 +9,5 @@ urlpatterns = [
     path("", views.HomeView.as_view(), name="main"),
     path("recipients/", views.RecipientListView.as_view(), name="recipients"),
     path("recipients/create_single/", views.SingleRecipientCreateView.as_view(), name="create_single_recipient"),
+    path("recipients/download_form/", views.DownloadRecipientsFormView.as_view(), name="download_recipients_form"),
 ]

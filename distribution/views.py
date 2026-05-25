@@ -1,10 +1,13 @@
 from typing import Any
 
+from django.http import FileResponse, HttpRequest
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView
 
 from .forms import SingleRecipientForm
 from .models import Message, Recipient
+from .services import get_excel_form
 
 
 class HomeView(TemplateView):
@@ -34,6 +37,15 @@ class SingleRecipientCreateView(CreateView):
         context["object_list"] = Recipient.objects.all()
         context["form_exist"] = True
         return context
+
+
+class DownloadRecipientsFormView(View):
+    """Контроллер ссылки для скачивания формы списка получателей"""
+
+    def get(self, request: HttpRequest) -> FileResponse:
+        """Передача файла формы в ответ сервера"""
+
+        return get_excel_form()
 
 
 class MessageCreateView(CreateView):
