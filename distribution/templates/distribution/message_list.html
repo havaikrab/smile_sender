@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список содержимого рассылок</h1>
+{% endblock %}
+
+{% block content %}
+    <table class="table table-hover  mt-5">
+        <thead>
+            <tr class="text-start">
+                <th scope="col" class="col-2">Заголовок</th>
+                <th scope="col" class="col-10">Содержимое</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message in object_list %}
+                <tr class="text-start clickable-row">
+                    <td>{{message.title}}</td>
+                    <td>{{message.content}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

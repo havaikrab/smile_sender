@@ -3,14 +3,12 @@
 {% load crispy_forms_tags %}
 
 {% block header %}
-    {% include 'distribution/header.html' %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список получателей рассылок</h1>
 {% endblock %}
 
 {% block content %}
-
-    <h1 class="text-center sp-bfc">Список получателей рассылок</h1>
     <div class="mt-5 row me-5">
-        <div class="col-6">
+        <div class="col-7">
             <div class="mb-5">
                 <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:create_single_recipient' %}">Добавить получателя</a>
                 <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:upload_recipients' %}">Загрузить список контактов</a>
@@ -54,9 +52,9 @@
                 {% endfor %}
             {% endif %}
         </div>
-        <div class="col-6 sp-cont align-self-start p-3">
+        <div class="col-5 sp-cont align-self-start p-2">
             <h5 class="text-center sp-bfc m-3">Excel-форма</h5>
-            <ul class="text-start sp-bfc m-3">
+            <ul class="text-start sp-bfc m-1">
                 <li>Скачайте данную форму</li>
                 <li>Заполните форму информацией о получателях</li>
                 <li>Нажмите кнопку "Загрузить список контактов"</li>

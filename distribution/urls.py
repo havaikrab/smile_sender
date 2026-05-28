@@ -13,4 +13,5 @@ urlpatterns = [
     path("recipients/delete/<int:pk>/", views.RecipientDeleteView.as_view(), name="delete_recipient"),
     path("recipients/download_form/", views.DownloadRecipientsFormView.as_view(), name="download_recipients_form"),
     path("recipients/upload_recipients/", views.UploadRecipientListView.as_view(), name="upload_recipients"),
+    path("messages/", views.MessageListView.as_view(), name="messages"),
 ]

@@ -10,7 +10,32 @@
 </head>
 <body class="sp-gr-bckgrnd">
 
-    {% block header %}{% endblock %}
+{% if user.is_authenticated %}
+    <div class="row">
+        <div class="col-2" style="color: red">
+            Аватар
+        </div>
+        <div class="col-8">
+            {% block header %} {% endblock %}
+        </div>
+        <div class="col-2 d-flex flex-column sp-auth p-3">
+            <a class="p-2 m-2 sp-auth-but sp-bfc text-center" href="#">Профиль</a>
+            <a class="p-2 m-2 sp-auth-but sp-bfc text-center" href="#">Выйти</a>
+        </div>
+    </div>
+{% else %}
+    <div class="row m-0">
+        <div class="col-2" style="color: red"></div>
+        <div class="col-8">
+            <h1 class="text-center mt-5 fw-bold sp-bfc">Добро пожаловать в Smile Sender!</h1>
+            <h6 class="text-center m-3 fw-bold sp-bfc">Пожалуйста, авторизуйтесь, чтобы получить доступ к сервису массовых рассылок</h6>
+        </div>
+        <div class="col-2 d-flex flex-column sp-auth p-3">
+            <a class="p-2 m-2 sp-auth-but sp-bfc text-center" href="#">Зарегистрироваться</a>
+            <a class="p-2 m-2 sp-auth-but sp-bfc text-center" href="#">Войти</a>
+        </div>
+    </div>
+{% endif %}
 
     <hr class="my-4" style="border: none; height: 2px; background-color: green; opacity: 0.2;">
     <div class="row me-0">

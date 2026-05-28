@@ -121,6 +121,12 @@ class UploadRecipientListView(FormView):
         return super().form_invalid(form)
 
 
+class MessageListView(ListView):
+    """Контроллер страницы списка сообщений"""
+
+    model = Message
+
+
 class MessageCreateView(CreateView):
     """Контроллер создания сообщения рассылки"""
 
