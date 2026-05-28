@@ -82,3 +82,24 @@
 .sp-nav-but:hover {
     box-shadow: 2px 2px 0 0 rgb(50, 100, 255);
 }
+
+
+/* Шрифт сообщений об успешных операциях */
+.sp-msg-success {
+    color: rgb(60, 180, 0);
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Шрифт предупреждений */
+.sp-msg-warning {
+    color: orange;
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Шрифт сообщений об ошибках */
+.sp-msg-error {
+    color: red;
+    font-family: "Times New Roman", Times, serif;
+}

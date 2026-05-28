@@ -2,12 +2,13 @@ from typing import Any
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit
-from django.forms import ModelForm
+from django import forms
+from django.core.files.base import File
 
 from .models import Recipient
 
 
-class SingleRecipientForm(ModelForm):
+class SingleRecipientForm(forms.ModelForm):
     """Форма для создания одного получателя рассылок"""
 
     class Meta:
@@ -30,3 +31,31 @@ class SingleRecipientForm(ModelForm):
         submit_button = Submit("submit", "Сохранить")
         submit_button.field_classes = "p-2 sp-nav-but sp-bfc text-center fs-5"
         self.helper.layout = Layout(email_field, first_name, middle_name, last_name, comment_field, submit_button)
+
+
+class UploadRecipientListForm(forms.Form):
+    """Форма для загрузки excel-файла, содержащего данные получателей"""
+
+    excel_file = forms.FileField(label="Загрузите Excel-файл установленной формы")
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        """Стилизация формы"""
+
+        super(UploadRecipientListForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.fields["excel_file"].widget = forms.FileInput(attrs={"accept": ".xlsx"})
+        file = Field("excel_file", wrapper_class="sp-bfc")
+        submit_button = Submit("submit", "Отправить")
+        submit_button.field_classes = "p-2 mt-3 sp-nav-but sp-bfc text-center fs-5"
+        self.helper.layout = Layout(file, submit_button)
+
+    def clean_excel_file(self) -> File:
+        """Проверка расширения загружаемого файла"""
+
+        file = self.cleaned_data.get("excel_file")
+        if isinstance(file, File):
+            if isinstance(file.name, str):
+                if file.name[-4:] == "xlsx":
+                    return file
+        raise forms.ValidationError("Загружаемый файл должен иметь расширение xlsx")
