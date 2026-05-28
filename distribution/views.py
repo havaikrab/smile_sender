@@ -6,7 +6,7 @@ from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, FormView, ListView, TemplateView
+from django.views.generic import CreateView, DeleteView, FormView, ListView, TemplateView, UpdateView
 
 from .forms import SingleRecipientForm, UploadRecipientListForm
 from .models import Message, Recipient
@@ -39,6 +39,39 @@ class SingleRecipientCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context["object_list"] = Recipient.objects.all()
         context["form_exist"] = True
+        return context
+
+
+class RecipientUpdateView(UpdateView):
+    """Контроллер редактирования информации о получателе"""
+
+    model = Recipient
+    form_class = SingleRecipientForm
+    template_name = "distribution/recipient_list.html"
+    success_url = reverse_lazy("distribution:recipients")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Вывод в шаблон списка существующих получателей"""
+
+        context = super().get_context_data(**kwargs)
+        context["object_list"] = Recipient.objects.all()
+        context["form_exist"] = True
+        return context
+
+
+class RecipientDeleteView(DeleteView):
+    """Контроллер удаления информации о получателе"""
+
+    model = Recipient
+    template_name = "distribution/recipient_list.html"
+    success_url = reverse_lazy("distribution:recipients")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Вывод в шаблон списка существующих получателей"""
+
+        context = super().get_context_data(**kwargs)
+        context["object_list"] = Recipient.objects.all()
+        context["confirm_delete"] = True
         return context
 
 

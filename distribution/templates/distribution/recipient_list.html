@@ -25,6 +25,26 @@
                     {% csrf_token %}
                     {% crispy form %}
                 </form>
+            {% elif confirm_delete %}
+                <div class="sp-cont p-4 me-5">
+                    <h5 class="sp-bfc mb-3">
+                        Вы действительно хотите удалить информацию о получателе
+                        {% if object.first_name and object.last_name %}
+                            {{object.first_name}} {{object.last_name}}?
+                        {% elif object.first_name and not object.last_name %}
+                            {{object.first_name}}?
+                        {% elif not object.first_name and object.last_name %}
+                            {{object.last_name}}?
+                        {% elif not object.first_name and not object.last_name %}
+                            {{object.email}}?
+                        {% endif %}
+                    </h5>
+                    <form method="post" enctype="multipart/form-data" style="display: flex">
+                        {% csrf_token %}
+                        <button type="submit" class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-5">Удалить</button>
+                        <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:recipients' %}">Отмена</a>
+                    </form>
+                </div>
             {% endif %}
             {% if messages %}
                 {% for message in messages %}
@@ -52,11 +72,12 @@
         <table class="sp-bfc" style="width:100%">
             <thead>
                 <tr class="text-start sp-bfc" style="border-bottom: 3px solid rgb(80, 200, 20)">
-                    <th scope="col" style="width:20%; padding: 10px">E-mail</th>
-                    <th scope="col" style="width:20%; padding: 10px">Фамилия</th>
-                    <th scope="col" style="width:20%; padding: 10px">Имя</th>
-                    <th scope="col" style="width:20%; padding: 10px">Отчество</th>
-                    <th scope="col" style="width:20%; padding: 10px">Комментарии</th>
+                    <th scope="col" style="width:14%; padding: 10px">E-mail</th>
+                    <th scope="col" style="width:14%; padding: 10px">Фамилия</th>
+                    <th scope="col" style="width:14%; padding: 10px">Имя</th>
+                    <th scope="col" style="width:14%; padding: 10px">Отчество</th>
+                    <th scope="col" style="width:14%; padding: 10px">Комментарии</th>
+                    <th scope="col" style="width:30%; padding: 10px">Действия</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,6 +88,10 @@
                         <td style="padding: 10px">{{recipient.first_name|default:""}}</td>
                         <td style="padding: 10px">{{recipient.middle_name|default:""}}</td>
                         <td style="padding: 10px">{{recipient.comment|default:""}}</td>
+                        <td style="padding: 10px">
+                            <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-6" href="{% url 'distribution:update_recipient' pk=recipient.pk %}">Изменить</a>
+                            <a class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-6" href="{% url 'distribution:delete_recipient' pk=recipient.pk %}">Удалить</a>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
