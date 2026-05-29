@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Письмо №{{object.pk}}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="sp-cont me-5 mt-5">
+    <div class="row m-3">
+        <h5 class="col-2 sp-bfc fw-bold">Тема письма:</h5>
+        <h6 class="col-10 sp-bfc sp-frame fw-bold">{{object.title}}</h6>
+    </div>
+    <div class="row m-3">
+        <h5 class="col-2 sp-bfc fw-bold">Сообщение:</h5>
+        <h6 class="col-10 sp-bfc sp-frame">{{object.content}}</h6>
+    </div>
+</div>
+{% endblock %}

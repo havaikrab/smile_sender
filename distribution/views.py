@@ -6,9 +6,9 @@ from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, FormView, ListView, TemplateView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
-from .forms import SingleRecipientForm, UploadRecipientListForm
+from .forms import MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Message, Recipient
 from .services import ExcelManager
 
@@ -127,7 +127,15 @@ class MessageListView(ListView):
     model = Message
 
 
+class MessageDetailView(DetailView):
+    """Контроллер страницы одного сообщения"""
+
+    model = Message
+
+
 class MessageCreateView(CreateView):
     """Контроллер создания сообщения рассылки"""
 
     model = Message
+    form_class = MessageForm
+    success_url = reverse_lazy("distribution:messages")

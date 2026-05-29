@@ -1,11 +1,12 @@
 from typing import Any
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit
+from crispy_forms.layout import HTML, Div, Field, Layout, Submit
 from django import forms
 from django.core.files.base import File
+from django.urls import reverse
 
-from .models import Recipient
+from .models import Message, Recipient
 
 
 class SingleRecipientForm(forms.ModelForm):
@@ -59,3 +60,28 @@ class UploadRecipientListForm(forms.Form):
                 if file.name[-4:] == "xlsx":
                     return file
         raise forms.ValidationError("Загружаемый файл должен иметь расширение xlsx")
+
+
+class MessageForm(forms.ModelForm):
+    """Форма создания нового письма"""
+
+    class Meta:
+        """Класс настроек формы"""
+
+        model = Message
+        fields = ["title", "content"]
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        """Стилизация формы"""
+
+        super(MessageForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        title_field = Field("title", wrapper_class="sp-bfc")
+        content_field = Field("content", wrapper_class="sp-bfc")
+        submit_button = Submit("submit", "Сохранить")
+        submit_button.field_classes = "p-2 mt-3 sp-nav-but sp-bfc text-center fs-5"
+        cancel_url = reverse("distribution:messages")
+        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-3 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
+        buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
+        self.helper.layout = Layout(title_field, content_field, buttons_div)

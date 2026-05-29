@@ -14,4 +14,6 @@ urlpatterns = [
     path("recipients/download_form/", views.DownloadRecipientsFormView.as_view(), name="download_recipients_form"),
     path("recipients/upload_recipients/", views.UploadRecipientListView.as_view(), name="upload_recipients"),
     path("messages/", views.MessageListView.as_view(), name="messages"),
+    path("create_message/", views.MessageCreateView.as_view(), name="create_message"),
+    path("message/<int:pk>/", views.MessageDetailView.as_view(), name="message_detail"),
 ]

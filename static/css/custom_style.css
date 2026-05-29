@@ -33,6 +33,18 @@
 }
 
 
+/* Строка-ссылка */
+.sp-link-row {
+    background: transparent;
+    border: 1px solid rgba(80, 200, 20, 0.4);
+    padding: 10px;
+    border-radius: 5px;
+}
+.sp-link-row:hover {
+    background: rgba(80, 200, 20, 0.1);
+}
+
+
 /* Рамка основного содержимого страницы */
 .sp-cont {
     background: transparent;
@@ -44,6 +56,14 @@
     height: auto;
 }
 
+
+/* Второстепенная рамка, разделяющая разные блоки контента */
+.sp-frame {
+    background: rgba(255, 230, 255, 0.5);
+    border: 1px solid rgba(80, 200, 20, 0.4);
+    padding: 10px;
+    border-radius: 5px;
+}
 
 
 /* Фон с градиентом для базового шаблона */

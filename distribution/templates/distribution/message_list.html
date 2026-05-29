@@ -3,24 +3,16 @@
 {% load crispy_forms_tags %}
 
 {% block header %}
-    <h1 class="text-center sp-bfc mt-5 fw-bold">Список содержимого рассылок</h1>
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список писем</h1>
 {% endblock %}
 
 {% block content %}
-    <table class="table table-hover  mt-5">
-        <thead>
-            <tr class="text-start">
-                <th scope="col" class="col-2">Заголовок</th>
-                <th scope="col" class="col-10">Содержимое</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="container mt-5">
+        <a class="p-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:create_message' %}">Составить новое письмо</a>
+        <div class="sp-cont p-3 me-5 mt-5">
             {% for message in object_list %}
-                <tr class="text-start clickable-row">
-                    <td>{{message.title}}</td>
-                    <td>{{message.content}}</td>
-                </tr>
+                <h5 class="sp-bfc sp-link-row" onclick="window.location.href='{% url 'distribution:message_detail' pk=message.pk %}'">{{message.title}}</h5>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    </div>
 {% endblock %}
