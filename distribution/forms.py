@@ -81,7 +81,11 @@ class MessageForm(forms.ModelForm):
         content_field = Field("content", wrapper_class="sp-bfc")
         submit_button = Submit("submit", "Сохранить")
         submit_button.field_classes = "p-2 mt-3 sp-nav-but sp-bfc text-center fs-5"
-        cancel_url = reverse("distribution:messages")
+        instance = self.instance
+        if instance and instance.pk:
+            cancel_url = reverse("distribution:message_detail", kwargs={"pk": instance.pk})
+        else:
+            cancel_url = reverse("distribution:messages")
         cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-3 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
         buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
         self.helper.layout = Layout(title_field, content_field, buttons_div)

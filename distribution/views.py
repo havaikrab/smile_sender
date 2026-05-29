@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.core.files.base import File
 from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
@@ -34,7 +34,8 @@ class SingleRecipientCreateView(CreateView):
     success_url = reverse_lazy("distribution:recipients")
 
     def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей"""
+        """Вывод в шаблон списка существующих получателей
+        и установка флага для отображения формы создания нового получателя рассылок"""
 
         context = super().get_context_data(**kwargs)
         context["object_list"] = Recipient.objects.all()
@@ -51,7 +52,8 @@ class RecipientUpdateView(UpdateView):
     success_url = reverse_lazy("distribution:recipients")
 
     def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей"""
+        """Вывод в шаблон списка существующих получателей
+        и установка флага для отображения формы редактирования информации о получателе рассылок"""
 
         context = super().get_context_data(**kwargs)
         context["object_list"] = Recipient.objects.all()
@@ -67,7 +69,8 @@ class RecipientDeleteView(DeleteView):
     success_url = reverse_lazy("distribution:recipients")
 
     def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей"""
+        """Вывод в шаблон списка существующих получателей
+        и установка флага для отображения формы удаления информации о получателе рассылок"""
 
         context = super().get_context_data(**kwargs)
         context["object_list"] = Recipient.objects.all()
@@ -92,7 +95,8 @@ class UploadRecipientListView(FormView):
     success_url = reverse_lazy("distribution:recipients")
 
     def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей"""
+        """Вывод в шаблон списка существующих получателей
+        и установка флага для отображения формы загрузки excel-файла с информацией о получателях рассылок"""
 
         context = super().get_context_data(**kwargs)
         context["object_list"] = Recipient.objects.all()
@@ -132,6 +136,13 @@ class MessageDetailView(DetailView):
 
     model = Message
 
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флага для отображения в шаблоне штатного набора действий"""
+
+        context = super().get_context_data(**kwargs)
+        context["normal_mode"] = True
+        return context
+
 
 class MessageCreateView(CreateView):
     """Контроллер создания сообщения рассылки"""
@@ -139,3 +150,48 @@ class MessageCreateView(CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy("distribution:messages")
+
+    def get_success_url(self) -> str:
+        """Редирект на страницу текущего сообщения после его создания"""
+
+        self_object = self.object
+        if isinstance(self_object, Message):
+            return reverse("distribution:message_detail", kwargs={"pk": self_object.pk})
+        return reverse("distribution:messages")
+
+
+class MessageUpdateView(UpdateView):
+    """Контроллер редактирования сообщения рассылки"""
+
+    model = Message
+    form_class = MessageForm
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флага для отображения шаблона в режиме редактирования"""
+
+        context = super().get_context_data(**kwargs)
+        context["update_mode"] = True
+        return context
+
+    def get_success_url(self) -> str:
+        """Редирект на страницу текущего сообщения после завершения редактирования"""
+
+        self_object = self.object
+        if isinstance(self_object, Message):
+            return reverse("distribution:message_detail", kwargs={"pk": self_object.pk})
+        return reverse("distribution:messages")
+
+
+class MessageDeleteView(DeleteView):
+    """Контроллер удаления сообщения рассылки"""
+
+    model = Message
+    template_name = "distribution/message_detail.html"
+    success_url = reverse_lazy("distribution:messages")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флага для отображения шаблона в режиме удаления"""
+
+        context = super().get_context_data(**kwargs)
+        context["confirm_delete"] = True
+        return context
