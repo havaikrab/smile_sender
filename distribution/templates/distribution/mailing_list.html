@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список рассылок</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <a class="p-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:create_mailing' %}">Создать новую рассылку</a>
+        <div class="sp-cont p-3 me-5 mt-5">
+            {% for mailing in object_list %}
+                <p>{{mailing.start_time}}</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

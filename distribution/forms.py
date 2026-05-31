@@ -1,12 +1,15 @@
+import datetime
 from typing import Any
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Div, Field, Layout, Submit
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import Message, Recipient
+from .models import Mailing, Message, Recipient
 
 
 class SingleRecipientForm(forms.ModelForm):
@@ -24,13 +27,13 @@ class SingleRecipientForm(forms.ModelForm):
         super(SingleRecipientForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        email_field = Field("email", wrapper_class="sp-bfc")
-        first_name = Field("first_name", wrapper_class="sp-bfc")
-        middle_name = Field("middle_name", wrapper_class="sp-bfc")
-        last_name = Field("last_name", wrapper_class="sp-bfc")
-        comment_field = Field("comment", wrapper_class="sp-bfc")
+        email_field = Field("email", wrapper_class="sp-bfc mb-5 mt-2")
+        first_name = Field("first_name", wrapper_class="sp-bfc my-5")
+        middle_name = Field("middle_name", wrapper_class="sp-bfc my-5")
+        last_name = Field("last_name", wrapper_class="sp-bfc my-5")
+        comment_field = Field("comment", wrapper_class="sp-bfc my-5")
         submit_button = Submit("submit", "Сохранить")
-        submit_button.field_classes = "p-2 sp-nav-but sp-bfc text-center fs-5"
+        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
         self.helper.layout = Layout(email_field, first_name, middle_name, last_name, comment_field, submit_button)
 
 
@@ -46,9 +49,9 @@ class UploadRecipientListForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.fields["excel_file"].widget = forms.FileInput(attrs={"accept": ".xlsx"})
-        file = Field("excel_file", wrapper_class="sp-bfc")
+        file = Field("excel_file", wrapper_class="sp-bfc mt-2")
         submit_button = Submit("submit", "Отправить")
-        submit_button.field_classes = "p-2 mt-3 sp-nav-but sp-bfc text-center fs-5"
+        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
         self.helper.layout = Layout(file, submit_button)
 
     def clean_excel_file(self) -> File:
@@ -77,15 +80,68 @@ class MessageForm(forms.ModelForm):
         super(MessageForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        title_field = Field("title", wrapper_class="sp-bfc")
-        content_field = Field("content", wrapper_class="sp-bfc")
+        title_field = Field("title", wrapper_class="sp-bfc mb-5 mt-2")
+        content_field = Field("content", wrapper_class="sp-bfc my-5")
         submit_button = Submit("submit", "Сохранить")
-        submit_button.field_classes = "p-2 mt-3 sp-nav-but sp-bfc text-center fs-5"
+        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
         instance = self.instance
         if instance and instance.pk:
             cancel_url = reverse("distribution:message_detail", kwargs={"pk": instance.pk})
         else:
             cancel_url = reverse("distribution:messages")
-        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-3 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
+        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-5 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
         buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
         self.helper.layout = Layout(title_field, content_field, buttons_div)
+
+
+class MailingForm(forms.ModelForm):
+    """Форма создания новой рассылки"""
+
+    class Meta:
+        """Класс настроек формы"""
+
+        model = Mailing
+        fields = ["start_time", "end_time", "message", "recipients"]
+        widgets = {
+            "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "recipients": forms.CheckboxSelectMultiple(),
+        }
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        """Стилизация формы"""
+
+        super(MailingForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        default_start = timezone.localtime() + datetime.timedelta(hours=1)
+        self.fields["start_time"].initial = datetime.datetime.strftime(default_start, "%Y-%m-%dT%H:%M")
+        default_end = timezone.localtime() + datetime.timedelta(hours=2)
+        self.fields["end_time"].initial = datetime.datetime.strftime(default_end, "%Y-%m-%dT%H:%M")
+        start_time = Field("start_time", wrapper_class="sp-bfc mb-5 mt-2", css_class="sp-bfc")
+        end_time = Field("end_time", wrapper_class="sp-bfc my-5", css_class="sp-bfc")
+        message_field = Field("message", wrapper_class="sp-bfc my-5")
+        recipients = Field("recipients", wrapper_class="sp-bfc my-5", css_class="sp-check-scroll")
+        submit_button = Submit("submit", "Сохранить")
+        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
+        self.helper.layout = Layout(start_time, end_time, message_field, recipients, submit_button)
+
+    def clean_start_time(self) -> datetime.datetime:
+        """Ограничение: начало рассылки не может быть установлено в прошлом"""
+
+        time_now = timezone.localtime()
+        start_time = self.cleaned_data.get("start_time")
+        if isinstance(start_time, datetime.datetime):
+            if start_time > time_now:
+                return start_time
+        raise ValidationError("Нельзя установить старт рассылки в прошлом.")
+
+    def clean_end_time(self) -> datetime.datetime:
+        """Ограничение: время завершения рассылки не может быть установлено раньше времени ее начала"""
+
+        start_time = self.cleaned_data.get("start_time")
+        end_time = self.cleaned_data.get("end_time")
+        if isinstance(start_time, datetime.datetime) and isinstance(end_time, datetime.datetime):
+            if end_time > start_time:
+                return end_time
+        raise ValidationError("Рассылку нельзя завершить раньше, чем начать.")

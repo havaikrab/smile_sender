@@ -8,8 +8,8 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
-from .forms import MessageForm, SingleRecipientForm, UploadRecipientListForm
-from .models import Message, Recipient
+from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
+from .models import Mailing, Message, Recipient
 from .services import ExcelManager
 
 
@@ -149,7 +149,6 @@ class MessageCreateView(CreateView):
 
     model = Message
     form_class = MessageForm
-    success_url = reverse_lazy("distribution:messages")
 
     def get_success_url(self) -> str:
         """Редирект на страницу текущего сообщения после его создания"""
@@ -195,3 +194,17 @@ class MessageDeleteView(DeleteView):
         context = super().get_context_data(**kwargs)
         context["confirm_delete"] = True
         return context
+
+
+class MailingListView(ListView):
+    """Контроллер страницы списка рассылок"""
+
+    model = Mailing
+
+
+class MailingCreateView(CreateView):
+    """Контроллер страницы создания рассылки"""
+
+    model = Mailing
+    form_class = MailingForm
+    success_url = reverse_lazy("distribution:mailing_list")

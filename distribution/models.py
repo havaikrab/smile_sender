@@ -19,7 +19,11 @@ class Recipient(models.Model):
     def __str__(self) -> str:
         """Строковое отображение объекта получателя в соответствии со значением поля email"""
 
-        return str(self.email)
+        result = f"{str(self.email)}"
+        if self.first_name or self.middle_name or self.last_name:
+            result += ": "
+        result += " ".join([name for name in [self.last_name, self.first_name, self.middle_name] if name is not None])
+        return result
 
     class Meta:
         """Класс настроек отображения получателя"""
@@ -52,11 +56,11 @@ class Mailing(models.Model):
     """Модель рассылки"""
 
     start_time: models.DateTimeField = models.DateTimeField(
-        verbose_name="Начало рассылки", help_text="Дата и время начала отправки писем, установленное отправителем."
+        verbose_name="Начало рассылки", help_text="Укажите дату и время начала отправки писем."
     )
     end_time: models.DateTimeField = models.DateTimeField(
         verbose_name="Окончание рассылки",
-        help_text="Дата и время окончания отправки писем, установленное отправителем.",
+        help_text="Укажите дату и время завершения отправки писем.",
     )
     STATUS_CHOICES = [("created", "Создана"), ("started", "Запущена"), ("completed", "Завершена")]
     status: models.CharField = models.CharField(
@@ -66,7 +70,7 @@ class Mailing(models.Model):
         Message, on_delete=models.CASCADE, related_name="mailings", verbose_name="Сообщение"
     )
     recipients: models.ManyToManyField = models.ManyToManyField(
-        Recipient, related_name="mailings", verbose_name="Получатели"
+        Recipient, related_name="mailings", verbose_name="Получатели", help_text="Выберите получателей рассылки"
     )
 
     def __str__(self) -> str:

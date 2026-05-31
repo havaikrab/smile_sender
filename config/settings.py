@@ -82,11 +82,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "ru-ru"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = os.getenv("LOCAL_TIME_ZONE", default="UTC")
 
 USE_I18N = True
 
 USE_TZ = True
+
+DATETIME_INPUT_FORMATS = ["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"]
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = (BASE_DIR / "static",)

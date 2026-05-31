@@ -27,21 +27,23 @@
 
 
 /* Основной шрифт сайта */
-.sp-bfc {
+.sp-bfc, .form-text, .form-label, .form-select {
     color: brown;
     font-family: "Times New Roman", Times, serif;
 }
-
-
-/* Строка-ссылка */
-.sp-link-row {
-    background: transparent;
-    border: 1px solid rgba(80, 200, 20, 0.4);
-    padding: 10px;
-    border-radius: 5px;
+.form-label {
+    font-size: 1.3rem !important;
 }
-.sp-link-row:hover {
-    background: rgba(80, 200, 20, 0.1);
+
+
+/* Прокручиваемый список опций */
+.sp-check-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid rgb(80, 200, 20);
+    border-radius: 5px;
+    background: white;
 }
 
 
@@ -57,9 +59,27 @@
 }
 
 
+/* Опасная кнопка*/
+.sp-dngr-but {
+    color: white;
+    background: rgb(255, 80, 80);
+    border-top: 1px solid rgb(255, 0, 0);
+    border-left: 1px solid rgb(255, 0, 0);
+    border-bottom: 3px solid rgb(255, 0, 0);
+    border-right: 3px solid rgb(255, 0, 0);
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-dngr-but:hover {
+    box-shadow: 2px 2px 0 0 rgb(255, 0, 0);
+}
+
+
 /* Второстепенная рамка, разделяющая разные блоки контента */
 .sp-frame {
-    background: rgba(255, 230, 255, 0.5);
+    background: white;
     border: 1px solid rgba(80, 200, 20, 0.4);
     padding: 10px;
     border-radius: 5px;
@@ -72,6 +92,39 @@
     background-attachment: fixed;
     background-size: cover;
     padding: 0;
+}
+
+
+/* Строка-ссылка */
+.sp-link-row {
+    background: transparent;
+    border: 1px solid rgba(80, 200, 20, 0.4);
+    padding: 10px;
+    border-radius: 5px;
+}
+.sp-link-row:hover {
+    background: rgba(80, 200, 20, 0.1);
+}
+
+
+/* Шрифт сообщений об ошибках */
+.sp-msg-error {
+    color: red;
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Шрифт сообщений об успешных операциях */
+.sp-msg-success {
+    color: rgb(60, 180, 0);
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Шрифт предупреждений */
+.sp-msg-warning {
+    color: orange;
+    font-family: "Times New Roman", Times, serif;
 }
 
 
@@ -101,43 +154,4 @@
 }
 .sp-nav-but:hover {
     box-shadow: 2px 2px 0 0 rgb(50, 100, 255);
-}
-
-
-/* Опасная кнопка*/
-.sp-dngr-but {
-    color: white;
-    background: rgb(255, 80, 80);
-    border-top: 1px solid rgb(255, 0, 0);
-    border-left: 1px solid rgb(255, 0, 0);
-    border-bottom: 3px solid rgb(255, 0, 0);
-    border-right: 3px solid rgb(255, 0, 0);
-    border-radius: 10px;
-    transition: box-shadow 0.1s ease;
-    text-decoration: none;
-    text: bold;
-}
-.sp-dngr-but:hover {
-    box-shadow: 2px 2px 0 0 rgb(255, 0, 0);
-}
-
-
-/* Шрифт сообщений об успешных операциях */
-.sp-msg-success {
-    color: rgb(60, 180, 0);
-    font-family: "Times New Roman", Times, serif;
-}
-
-
-/* Шрифт предупреждений */
-.sp-msg-warning {
-    color: orange;
-    font-family: "Times New Roman", Times, serif;
-}
-
-
-/* Шрифт сообщений об ошибках */
-.sp-msg-error {
-    color: red;
-    font-family: "Times New Roman", Times, serif;
 }
