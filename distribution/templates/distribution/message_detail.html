@@ -11,22 +11,22 @@
 {% block content %}
     <div class="sp-cont me-5 mt-5">
         <div class="row m-3">
-            <h5 class="col-2 sp-bfc fw-bold">Тема письма:</h5>
+            <h5 class="col-2 sp-bfc fw-bold text-end">Тема письма:</h5>
             <h6 class="col-10 sp-bfc sp-frame fw-bold">{{object.title}}</h6>
         </div>
         <div class="row m-3">
-            <h5 class="col-2 sp-bfc fw-bold">Сообщение:</h5>
+            <h5 class="col-2 sp-bfc fw-bold text-end">Сообщение:</h5>
             <h6 class="col-10 sp-bfc sp-frame">{{object.content}}</h6>
         </div>
     </div>
     {% if normal_mode %}
-        <div class="mt-5">
+        <div class="my-5">
             <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:update_message' pk=object.pk %}">Редактировать</a>
             <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_message' pk=object.pk %}">Удалить</a>
         </div>
     {% elif confirm_delete %}
         <h5 class="sp-bfc my-4">Вы действительно хотите удалить данное письмо?</h5>
-        <form method="post" enctype="multipart/form-data" style="display: flex">
+        <form method="post" class='mb-5' enctype="multipart/form-data" style="display: flex">
             {% csrf_token %}
             <button type="submit" class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-5">Удалить</button>
             <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:message_detail' pk=object.pk %}">Отмена</a>

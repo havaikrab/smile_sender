@@ -7,8 +7,10 @@
 {% endblock %}
 
 {% block content %}
-    <form class="sp-cont px-5 py-4 mt-5 me-5 sp-bfc" method="post">
-        {% csrf_token %}
-        {% crispy form %}
-    </form>
+    <div class="row">
+        <form class="col-7 sp-cont px-5 py-4 mt-5 me-5 sp-bfc" method="post">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
 {% endblock %}

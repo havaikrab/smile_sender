@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block header %}
+        <h1 class="text-center sp-bfc mt-5 fw-bold">Рассылка №{{object.pk}}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="sp-cont me-5 mt-5">
+        {% if ready %}
+            <span class="badge rounded-pill text-bg-success m-3">Готова к запуску</span>
+        {% elif object.status == 'created' and not ready %}
+            <span class="badge rounded-pill text-bg-warning m-3">Подготовлена</span>
+        {% elif object.status == 'started' %}
+            <span class="badge rounded-pill text-bg-primary m-3">Запущена</span>
+        {% else %}
+            <span class="badge rounded-pill text-bg-secondary m-3">Завершена</span>
+        {% endif %}
+        <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Тема:</h5>
+            <h6 class="col-10 sp-bfc sp-frame fw-bold">{{object.message.title}}</h6>
+        </div>
+        <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Сообщение:</h5>
+            <h6 class="col-10 sp-bfc sp-frame">{{object.message.content}}</h6>
+        </div>
+        <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Период:</h5>
+            <h6 class="col-10 sp-bfc my-2">
+                С <span class="sp-frame fs-5">{{object.start_time}}</span> ПО <span class="sp-frame fs-5">{{object.end_time}}</span>
+            </h6>
+        </div>
+                <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Получатели:</h5>
+            <div class="col-10 sp-bfc sp-check-scroll">
+                {% for recipient in object.recipients.all %}
+                    <p>{{recipient}}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% if normal_mode %}
+        <div class="my-5">
+            {% if ready %}
+                <a class="p-2 m-2 sp-start-but sp-bfc text-center fs-5" href="#">Запустить</a>
+            {% endif %}
+            {% if object.status == 'created' %}
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="#">Редактировать</a>
+            {% endif %}
+            {% if object.status == 'started' %}
+                <a class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5" href="#">Прервать</a>
+            {% endif %}
+            <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="#">Удалить</a>
+        </div>
+    {% elif confirm_delete %}
+        <h5 class="sp-bfc my-4">Вы действительно хотите удалить данное письмо?</h5>
+        <form method="post" class='mb-5' enctype="multipart/form-data" style="display: flex">
+            {% csrf_token %}
+            <button type="submit" class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-5">Удалить</button>
+            <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:message_detail' pk=object.pk %}">Отмена</a>
+        </form>
+    {% endif %}
+{% endblock %}

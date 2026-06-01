@@ -3,12 +3,14 @@ from io import BytesIO
 import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
+from django.db.models import QuerySet
 from django.forms import BaseForm
 from django.http import FileResponse
+from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from distribution.models import Recipient
+from distribution.models import Mailing, Recipient
 
 
 class ExcelManager:
@@ -95,3 +97,22 @@ class ExcelManager:
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         return response
+
+
+def group_context(queryset: QuerySet[Mailing]) -> dict:
+    """Сортирует список объектов рассылок в соответствии со статусом"""
+
+    time_now = timezone.now()
+    sorted_context: dict[str, list] = {"created": list(), "ready": list(), "started": list(), "completed": list()}
+    for mailing in queryset:
+        if mailing.end_time < time_now or mailing.status == "completed":
+            mailing.status = "completed"
+            sorted_context["completed"].append(mailing)
+        elif mailing.status == "started":
+            sorted_context["started"].append(mailing)
+        elif mailing.start_time <= time_now <= mailing.end_time:
+            sorted_context["ready"].append(mailing)
+        else:
+            sorted_context["created"].append(mailing)
+        Mailing.objects.bulk_update(sorted_context["completed"], ["status"])
+    return sorted_context

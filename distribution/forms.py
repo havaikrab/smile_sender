@@ -124,7 +124,10 @@ class MailingForm(forms.ModelForm):
         recipients = Field("recipients", wrapper_class="sp-bfc my-5", css_class="sp-check-scroll")
         submit_button = Submit("submit", "Сохранить")
         submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
-        self.helper.layout = Layout(start_time, end_time, message_field, recipients, submit_button)
+        cancel_url = reverse("distribution:mailing_list")
+        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-5 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
+        buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
+        self.helper.layout = Layout(start_time, end_time, message_field, recipients, buttons_div)
 
     def clean_start_time(self) -> datetime.datetime:
         """Ограничение: начало рассылки не может быть установлено в прошлом"""

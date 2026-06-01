@@ -59,7 +59,7 @@
 }
 
 
-/* Опасная кнопка*/
+/* Опасная кнопка */
 .sp-dngr-but {
     color: white;
     background: rgb(255, 80, 80);
@@ -98,7 +98,7 @@
 /* Строка-ссылка */
 .sp-link-row {
     background: transparent;
-    border: 1px solid rgba(80, 200, 20, 0.4);
+    border: 2px solid rgba(150, 200, 255, 0.5);
     padding: 10px;
     border-radius: 5px;
 }
@@ -154,4 +154,40 @@
 }
 .sp-nav-but:hover {
     box-shadow: 2px 2px 0 0 rgb(50, 100, 255);
+}
+
+
+/* Кнопка запуска процесса */
+.sp-start-but {
+    color: white;
+    background: rgb(30, 220, 10);
+    border-top: 1px solid green;
+    border-left: 1px solid green;
+    border-bottom: 3px solid green;
+    border-right: 3px solid green;
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-start-but:hover {
+    box-shadow: 2px 2px 0 0 green;
+}
+
+
+/* Кнопка остановки процесса */
+.sp-stop-but {
+    color: red;
+    background: rgb(255, 180, 50);
+    border-top: 1px solid red;
+    border-left: 1px solid red;
+    border-bottom: 3px solid red;
+    border-right: 3px solid red;
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-stop-but:hover {
+    box-shadow: 2px 2px 0 0 red;
 }

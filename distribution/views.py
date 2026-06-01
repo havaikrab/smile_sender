@@ -5,12 +5,13 @@ from django.core.files.base import File
 from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
-from .services import ExcelManager
+from .services import ExcelManager, group_context
 
 
 class HomeView(TemplateView):
@@ -196,15 +197,37 @@ class MessageDeleteView(DeleteView):
         return context
 
 
-class MailingListView(ListView):
-    """Контроллер страницы списка рассылок"""
-
-    model = Mailing
-
-
 class MailingCreateView(CreateView):
     """Контроллер страницы создания рассылки"""
 
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy("distribution:mailing_list")
+
+
+class MailingListView(ListView):
+    """Контроллер страницы списка рассылок"""
+
+    model = Mailing
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Передача в шаблон словаря сгруппированных по значению статуса объектов рассылок"""
+
+        context = super().get_context_data(**kwargs)
+        context["sorted_objects"] = group_context(context["object_list"])
+        return context
+
+
+class MailingDetailView(DetailView):
+    """Контроллер страницы рассылки"""
+
+    model = Mailing
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флагов для отображения шаблона в штатном режиме"""
+
+        context = super().get_context_data(**kwargs)
+        if self.object.start_time <= timezone.now() <= self.object.end_time:
+            context["ready"] = True
+        context["normal_mode"] = True
+        return context
