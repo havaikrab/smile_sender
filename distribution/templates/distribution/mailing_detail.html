@@ -49,14 +49,14 @@
             {% if object.status == 'started' %}
                 <a class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5" href="#">Прервать</a>
             {% endif %}
-            <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="#">Удалить</a>
+            <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_mailing' pk=object.pk %}">Удалить</a>
         </div>
     {% elif confirm_delete %}
-        <h5 class="sp-bfc my-4">Вы действительно хотите удалить данное письмо?</h5>
+        <h5 class="sp-bfc my-4">Вы действительно хотите удалить данную рассылку?</h5>
         <form method="post" class='mb-5' enctype="multipart/form-data" style="display: flex">
             {% csrf_token %}
             <button type="submit" class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-5">Удалить</button>
-            <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:message_detail' pk=object.pk %}">Отмена</a>
+            <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:mailing_detail' pk=object.pk %}">Отмена</a>
         </form>
     {% endif %}
 {% endblock %}

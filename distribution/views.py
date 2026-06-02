@@ -137,13 +137,6 @@ class MessageDetailView(DetailView):
 
     model = Message
 
-    def get_context_data(self, **kwargs: Any) -> dict:
-        """Установка флага для отображения в шаблоне штатного набора действий"""
-
-        context = super().get_context_data(**kwargs)
-        context["normal_mode"] = True
-        return context
-
 
 class MessageCreateView(CreateView):
     """Контроллер создания сообщения рассылки"""
@@ -165,13 +158,6 @@ class MessageUpdateView(UpdateView):
 
     model = Message
     form_class = MessageForm
-
-    def get_context_data(self, **kwargs: Any) -> dict:
-        """Установка флага для отображения шаблона в режиме редактирования"""
-
-        context = super().get_context_data(**kwargs)
-        context["update_mode"] = True
-        return context
 
     def get_success_url(self) -> str:
         """Редирект на страницу текущего сообщения после завершения редактирования"""
@@ -239,13 +225,6 @@ class MailingUpdateView(UpdateView):
     model = Mailing
     form_class = MailingForm
 
-    def get_context_data(self, **kwargs: Any) -> dict:
-        """Установка флага для отображения шаблона в режиме редактирования"""
-
-        context = super().get_context_data(**kwargs)
-        context["update_mode"] = True
-        return context
-
     def get_success_url(self) -> str:
         """Редирект на страницу текущей рассылки после завершения редактирования"""
 
@@ -253,3 +232,18 @@ class MailingUpdateView(UpdateView):
         if isinstance(self_object, Mailing):
             return reverse("distribution:mailing_detail", kwargs={"pk": self_object.pk})
         return reverse("distribution:mailing_list")
+
+
+class MailingDeleteView(DeleteView):
+    """Контроллер удаления рассылки"""
+
+    model = Mailing
+    template_name = "distribution/mailing_detail.html"
+    success_url = reverse_lazy("distribution:mailing_list")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флага для отображения шаблона в режиме удаления"""
+
+        context = super().get_context_data(**kwargs)
+        context["confirm_delete"] = True
+        return context

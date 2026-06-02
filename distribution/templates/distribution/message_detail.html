@@ -1,11 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    {% if normal_mode %}
-        <h1 class="text-center sp-bfc mt-5 fw-bold">Письмо №{{object.pk}}</h1>
-    {% elif confirm_delete %}
-        <h1 class="text-center sp-bfc mt-5 fw-bold">Удаление письма №{{object.pk}}</h1>
-    {% endif %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Письмо №{{object.pk}}</h1>
 {% endblock %}
 
 {% block content %}
@@ -19,12 +15,12 @@
             <h6 class="col-10 sp-bfc sp-frame">{{object.content}}</h6>
         </div>
     </div>
-    {% if normal_mode %}
+    {% if not confirm_delete %}
         <div class="my-5">
             <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:update_message' pk=object.pk %}">Редактировать</a>
             <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_message' pk=object.pk %}">Удалить</a>
         </div>
-    {% elif confirm_delete %}
+    {% else %}
         <h5 class="sp-bfc my-4">Вы действительно хотите удалить данное письмо?</h5>
         <form method="post" class='mb-5' enctype="multipart/form-data" style="display: flex">
             {% csrf_token %}
