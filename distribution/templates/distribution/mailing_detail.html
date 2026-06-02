@@ -44,7 +44,7 @@
                 <a class="p-2 m-2 sp-start-but sp-bfc text-center fs-5" href="#">Запустить</a>
             {% endif %}
             {% if object.status == 'created' %}
-                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="#">Редактировать</a>
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:update_mailing' pk=object.pk %}">Редактировать</a>
             {% endif %}
             {% if object.status == 'started' %}
                 <a class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5" href="#">Прервать</a>

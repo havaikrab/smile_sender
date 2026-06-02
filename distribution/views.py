@@ -231,3 +231,25 @@ class MailingDetailView(DetailView):
             context["ready"] = True
         context["normal_mode"] = True
         return context
+
+
+class MailingUpdateView(UpdateView):
+    """Контроллер страницы редактирования рассылки"""
+
+    model = Mailing
+    form_class = MailingForm
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флага для отображения шаблона в режиме редактирования"""
+
+        context = super().get_context_data(**kwargs)
+        context["update_mode"] = True
+        return context
+
+    def get_success_url(self) -> str:
+        """Редирект на страницу текущей рассылки после завершения редактирования"""
+
+        self_object = self.object
+        if isinstance(self_object, Mailing):
+            return reverse("distribution:mailing_detail", kwargs={"pk": self_object.pk})
+        return reverse("distribution:mailing_list")

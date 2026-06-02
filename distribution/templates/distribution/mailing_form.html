@@ -3,7 +3,11 @@
 {% load crispy_forms_tags %}
 
 {% block header %}
-    <h1 class="text-center sp-bfc mt-5 fw-bold">Новая рассылка</h1>
+    {% if update_mode %}
+        <h1 class="text-center sp-bfc mt-5 fw-bold">Редактирование рассылки №{{object.pk}}</h1>
+    {% else %}
+        <h1 class="text-center sp-bfc mt-5 fw-bold">Новая рассылка</h1>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
