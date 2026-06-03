@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from config.settings import EMAIL_HOST_USER
-from distribution.models import Mailing
+from distribution.models import Attempt, Mailing
 
 
 class Command(BaseCommand):
@@ -40,19 +40,21 @@ class Command(BaseCommand):
         mailing.status = "started"
         mailing.save()
         recipients = mailing.recipients.all()
-        emails = [recipient.email for recipient in recipients]
-        for i in emails:
+        for recipient in recipients:
             try:
                 send_mail(
                     mailing.message.title,
                     mailing.message.content,
                     from_email=EMAIL_HOST_USER,
-                    recipient_list=[i],
+                    recipient_list=[recipient.email],
                     fail_silently=False,
                 )
-                print(f"Письмо отправлено на {i}")
+                smtp_response = "250 OK: message accepted for delivery"
+                status = "success"
             except Exception as exc:
-                print(f"{type(exc)}: {exc}")
+                smtp_response = str(exc)
+                status = "fail"
+            Attempt.objects.create(mailing=mailing, recipient=recipient, status=status, server_response=smtp_response)
             time_to_sleep = int(os.getenv("SENDING_INTERVAL", 300))
             time.sleep(time_to_sleep)
         mailing.status = "completed"

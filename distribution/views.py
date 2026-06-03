@@ -213,7 +213,7 @@ class MailingDetailView(DetailView):
         """Установка флагов для отображения шаблона в штатном режиме"""
 
         context = super().get_context_data(**kwargs)
-        if self.object.start_time <= timezone.now() <= self.object.end_time:
+        if self.object.start_time <= timezone.now() <= self.object.end_time and self.object.status == "created":
             context["ready"] = True
         context["normal_mode"] = True
         return context
