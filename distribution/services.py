@@ -1,3 +1,5 @@
+import logging
+import os
 from io import BytesIO
 
 import openpyxl
@@ -11,6 +13,14 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from distribution.models import Mailing, Recipient
+
+distribution_logger = logging.getLogger("distribution_logger")
+os.makedirs("logs/", exist_ok=True)
+file_handler = logging.FileHandler("logs/distribution_logger.log", mode="a", encoding="utf-8")
+file_formatter = logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
+file_handler.setFormatter(file_formatter)
+distribution_logger.addHandler(file_handler)
+distribution_logger.setLevel(logging.INFO)
 
 
 class ExcelManager:

@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from config.settings import EMAIL_HOST_USER
 from distribution.models import Attempt, Mailing
+from distribution.services import distribution_logger
 
 
 class Command(BaseCommand):
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         parser.add_argument("--id", type=int, help="id рассылки из базы данных")
 
     @staticmethod
-    def __check_readiness(mailing_id: int) -> None:
+    def __check_readiness(mailing_id: int) -> Mailing:
         """Определяет готовность рассылки к запуску"""
 
         mailing = Mailing.objects.get(pk=mailing_id)
@@ -32,14 +33,18 @@ class Command(BaseCommand):
         time_now = timezone.now()
         if mailing.start_time > time_now or mailing.end_time < time_now:
             raise ValueError("Рассылка не может быть запущена в настоящее время.")
+        return mailing
 
     @staticmethod
     def __send_mails(mailing: Mailing) -> None:
         """Непосредственная отправка писем"""
 
+        distribution_logger.info(f"Запущена рассылка id{mailing.pk}.")
         mailing.status = "started"
         mailing.save()
         recipients = mailing.recipients.all()
+        success_count = 0
+        fail_count = 0
         for recipient in recipients:
             try:
                 send_mail(
@@ -51,26 +56,30 @@ class Command(BaseCommand):
                 )
                 smtp_response = "250 OK: message accepted for delivery"
                 status = "success"
+                success_count += 1
             except Exception as exc:
                 smtp_response = str(exc)
                 status = "fail"
+                distribution_logger.warning(f"Ошибка при обращении к SMTP-серверу: {exc}.")
+                fail_count += 1
             Attempt.objects.create(mailing=mailing, recipient=recipient, status=status, server_response=smtp_response)
             time_to_sleep = int(os.getenv("SENDING_INTERVAL", 300))
             time.sleep(time_to_sleep)
         mailing.status = "completed"
         mailing.save()
-        print("Рассылка завершена")
+        distribution_logger.info(
+            f"Рассылка id{mailing.pk} завершена. Отправлено - {success_count}, не отправлено - {fail_count} писем."
+        )
 
     def handle(self, *args: Any, **options: Any) -> None:
         """Запись данных приложения catalog в файл fixture/fixture_catalog.json"""
 
         mailing_id = options.get("id", 0)
         try:
-            self.__check_readiness(mailing_id)
+            mailing = self.__check_readiness(mailing_id)
         except ObjectDoesNotExist:
-            print(f"Рассылка с id={mailing_id} не существует в базе данных")
+            distribution_logger.error("Попытка запуска несуществующей рассылки.")
         except ValueError as exc:
-            print(exc)
+            distribution_logger.error(f"{exc}")
         else:
-            mailing = Mailing.objects.get(pk=mailing_id)
             self.__send_mails(mailing)
