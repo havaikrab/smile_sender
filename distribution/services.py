@@ -173,8 +173,10 @@ def send_mails(mailing: Mailing) -> None:
             status = "fail"
             distribution_logger.warning(f"Ошибка при обращении к SMTP-серверу: {exc}.")
             fail_count += 1
+        send_time = timezone.localtime()
+        print(send_time)
         attempts_list.append(
-            Attempt(mailing=mailing, recipient=recipient, status=status, server_response=smtp_response)
+            Attempt(mailing=mailing, recipient=recipient, status=status, server_response=smtp_response, send_time=send_time)
         )
         time.sleep(time_to_sleep)
     Attempt.objects.bulk_create(attempts_list)

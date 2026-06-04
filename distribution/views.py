@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from django.contrib import messages
@@ -12,9 +13,10 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
-from .services import ExcelManager, group_context
+from .services import ExcelManager, group_context, execute_mailing, distribution_logger
 from .tasks import shared_send_mailing_task
 
+USE_CELERY = os.getenv('USE_CELERY').lower() == 'true'
 
 class HomeView(TemplateView):
     """Контроллер главной страницы приложения distribution"""
@@ -261,7 +263,9 @@ class MailingStartView(View):
         if mailing.status != "created":
             messages.error(request, f"Рассылка со статусом {mailing.status} не может быть запущена повторно.")
             return redirect("distribution:mailing_detail", pk=pk)
-
-        shared_send_mailing_task.delay(pk)
+        if USE_CELERY:
+            shared_send_mailing_task.delay(pk)
+        else:
+            execute_mailing(pk)
         messages.success(request, f'Рассылка "{mailing.message.title}" запущена')
         return redirect("distribution:mailing_detail", pk=pk)

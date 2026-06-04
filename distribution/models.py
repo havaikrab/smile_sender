@@ -95,8 +95,7 @@ class Attempt(models.Model):
     recipient: models.ForeignKey = models.ForeignKey(
         Recipient, on_delete=models.CASCADE, related_name="attempts", verbose_name="Получатель"
     )
-    send_time: models.DateTimeField = models.DateTimeField(
-        auto_now_add=True, verbose_name="Дата и время попытки", help_text="Дата и время попытки отправки "
+    send_time: models.DateTimeField = models.DateTimeField(verbose_name="Дата и время попытки", help_text="Дата и время попытки отправки "
     )
     STATUS_CHOICES = [("success", "Успешно"), ("fail", "Не успешно")]
     status: models.CharField = models.CharField(
