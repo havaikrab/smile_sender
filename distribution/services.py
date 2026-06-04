@@ -4,7 +4,7 @@ import time
 from io import BytesIO
 
 import openpyxl
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.base import File
 from django.core.mail import send_mail
 from django.db.models import QuerySet
@@ -131,6 +131,20 @@ def group_context(queryset: QuerySet[Mailing]) -> dict:
     return sorted_context
 
 
+def check_readiness(mailing_id: int) -> Mailing:
+    """Определяет готовность рассылки к запуску"""
+
+    mailing = Mailing.objects.get(pk=mailing_id)
+    if mailing.status != "created":
+        raise ValueError(
+            f'Запускаемая рассылка должна иметь статус "created". Текущий статус рассылки {mailing.status}.'
+        )
+    time_now = timezone.now()
+    if mailing.start_time > time_now or mailing.end_time < time_now:
+        raise ValueError("Рассылка не может быть запущена в настоящее время.")
+    return mailing
+
+
 def send_mails(mailing: Mailing) -> None:
     """Отправка писем с установленным временным интервалом"""
 
@@ -169,3 +183,16 @@ def send_mails(mailing: Mailing) -> None:
     distribution_logger.info(
         f"Рассылка id{mailing.pk} завершена. Отправлено - {success_count}, не отправлено - {fail_count} писем."
     )
+
+
+def execute_mailing(mailing_id: int) -> None:
+    """Запускает рассылку"""
+
+    try:
+        mailing = check_readiness(mailing_id)
+    except ObjectDoesNotExist:
+        distribution_logger.error("Попытка запуска несуществующей рассылки.")
+    except ValueError as exc:
+        distribution_logger.error(f"{exc}")
+    else:
+        send_mails(mailing)

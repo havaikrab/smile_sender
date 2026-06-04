@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.files.base import File
 from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
@@ -12,6 +13,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
 from .services import ExcelManager, group_context
+from .tasks import shared_send_mailing_task
 
 
 class HomeView(TemplateView):
@@ -247,3 +249,19 @@ class MailingDeleteView(DeleteView):
         context = super().get_context_data(**kwargs)
         context["confirm_delete"] = True
         return context
+
+
+class MailingStartView(View):
+    """Контроллер запуска процесса рассылки писем"""
+
+    def post(self, request: HttpRequest, pk: int) -> HttpResponse:
+        """"""
+
+        mailing = get_object_or_404(Mailing, pk=pk)
+        if mailing.status != "created":
+            messages.error(request, f"Рассылка со статусом {mailing.status} не может быть запущена повторно.")
+            return redirect("distribution:mailing_detail", pk=pk)
+
+        shared_send_mailing_task.delay(pk)
+        messages.success(request, f'Рассылка "{mailing.message.title}" запущена')
+        return redirect("distribution:mailing_detail", pk=pk)
