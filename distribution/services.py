@@ -1,10 +1,12 @@
 import logging
 import os
+import time
 from io import BytesIO
 
 import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
+from django.core.mail import send_mail
 from django.db.models import QuerySet
 from django.forms import BaseForm
 from django.http import FileResponse
@@ -12,7 +14,8 @@ from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from distribution.models import Mailing, Recipient
+from config.settings import EMAIL_HOST_USER
+from distribution.models import Attempt, Mailing, Recipient
 
 distribution_logger = logging.getLogger("distribution_logger")
 os.makedirs("logs/", exist_ok=True)
@@ -126,3 +129,43 @@ def group_context(queryset: QuerySet[Mailing]) -> dict:
             sorted_context["created"].append(mailing)
         Mailing.objects.bulk_update(sorted_context["completed"], ["status"])
     return sorted_context
+
+
+def send_mails(mailing: Mailing) -> None:
+    """Отправка писем с установленным временным интервалом"""
+
+    distribution_logger.info(f"Запущена рассылка id{mailing.pk}.")
+    mailing.status = "started"
+    mailing.save()
+    recipients = mailing.recipients.all()
+    success_count = 0
+    fail_count = 0
+    attempts_list = list()
+    time_to_sleep = int(os.getenv("SENDING_INTERVAL", 300))
+    for recipient in recipients:
+        try:
+            send_mail(
+                mailing.message.title,
+                mailing.message.content,
+                from_email=EMAIL_HOST_USER,
+                recipient_list=[recipient.email],
+                fail_silently=False,
+            )
+            smtp_response = "250 OK: message accepted for delivery"
+            status = "success"
+            success_count += 1
+        except Exception as exc:
+            smtp_response = str(exc)
+            status = "fail"
+            distribution_logger.warning(f"Ошибка при обращении к SMTP-серверу: {exc}.")
+            fail_count += 1
+        attempts_list.append(
+            Attempt(mailing=mailing, recipient=recipient, status=status, server_response=smtp_response)
+        )
+        time.sleep(time_to_sleep)
+    Attempt.objects.bulk_create(attempts_list)
+    mailing.status = "completed"
+    mailing.save()
+    distribution_logger.info(
+        f"Рассылка id{mailing.pk} завершена. Отправлено - {success_count}, не отправлено - {fail_count} писем."
+    )
