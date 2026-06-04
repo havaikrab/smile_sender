@@ -173,21 +173,3 @@
 .sp-start-but:hover {
     box-shadow: 2px 2px 0 0 green;
 }
-
-
-/* Кнопка остановки процесса */
-.sp-stop-but {
-    color: red;
-    background: rgb(255, 180, 50);
-    border-top: 1px solid red;
-    border-left: 1px solid red;
-    border-bottom: 3px solid red;
-    border-right: 3px solid red;
-    border-radius: 10px;
-    transition: box-shadow 0.1s ease;
-    text-decoration: none;
-    text: bold;
-}
-.sp-stop-but:hover {
-    box-shadow: 2px 2px 0 0 red;
-}

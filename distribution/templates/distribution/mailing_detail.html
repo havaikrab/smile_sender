@@ -39,7 +39,7 @@
         </div>
     </div>
     {% for message in messages %}
-        <p>{{message}}</p>
+        <p class="sp-msg-{{message.tags}} mt-4">{{message}}</p>
     {% endfor %}
     {% if normal_mode %}
         <form method="post" action="{% url 'distribution:start_mailing' pk=object.pk %}" class="my-5 d-flex">
@@ -52,9 +52,12 @@
                 <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:update_mailing' pk=object.pk %}">Редактировать</a>
             {% endif %}
             {% if object.status == 'started' %}
-                <a class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5" href="#">Прервать</a>
+                <h2 class="p-2 m-2 sp-bfc">Рассылка запущена, дождитесь окончания процесса</h2>
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:main' %}">На главную</a>
             {% endif %}
-            <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_mailing' pk=object.pk %}">Удалить</a>
+            {% if object.status != 'started' %}
+                <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_mailing' pk=object.pk %}">Удалить</a>
+            {% endif %}
         </form>
     {% elif confirm_delete %}
         <h5 class="sp-bfc my-4">Вы действительно хотите удалить данную рассылку?</h5>
