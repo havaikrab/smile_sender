@@ -13,10 +13,11 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
-from .services import ExcelManager, group_context, execute_mailing, distribution_logger
+from .services import ExcelManager, execute_mailing, group_context
 from .tasks import shared_send_mailing_task
 
-USE_CELERY = os.getenv('USE_CELERY').lower() == 'true'
+USE_CELERY = os.getenv("USE_CELERY", "").lower() == "true"
+
 
 class HomeView(TemplateView):
     """Контроллер главной страницы приложения distribution"""

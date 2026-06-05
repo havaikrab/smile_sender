@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "distribution",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -65,6 +66,10 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = "users.CustomUser"
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "distribution:main"
+LOGOUT_REDIRECT_URL = "distribution:main"
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",

@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import CustomUser
+
 
 class Recipient(models.Model):
     """Модель получателя рассылки"""
@@ -38,6 +40,9 @@ class Message(models.Model):
 
     title: models.CharField = models.CharField(max_length=300, verbose_name="Тема сообщения")
     content: models.TextField = models.TextField(verbose_name="Содержание письма")
+    author: models.ForeignKey = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="messages", verbose_name="Автор"
+    )
 
     def __str__(self) -> str:
         """Строковое отображение объекта сообщения в виде его темы"""
@@ -70,7 +75,7 @@ class Mailing(models.Model):
         Message, on_delete=models.CASCADE, related_name="mailings", verbose_name="Сообщение"
     )
     recipients: models.ManyToManyField = models.ManyToManyField(
-        Recipient, related_name="mailings", verbose_name="Получатели", help_text="Выберите получателей рассылки"
+        Recipient, related_name="offers", verbose_name="Получатели", help_text="Выберите получателей рассылки"
     )
 
     def __str__(self) -> str:
@@ -95,7 +100,8 @@ class Attempt(models.Model):
     recipient: models.ForeignKey = models.ForeignKey(
         Recipient, on_delete=models.CASCADE, related_name="attempts", verbose_name="Получатель"
     )
-    send_time: models.DateTimeField = models.DateTimeField(verbose_name="Дата и время попытки", help_text="Дата и время попытки отправки "
+    send_time: models.DateTimeField = models.DateTimeField(
+        verbose_name="Дата и время попытки", help_text="Дата и время попытки отправки "
     )
     STATUS_CHOICES = [("success", "Успешно"), ("fail", "Не успешно")]
     status: models.CharField = models.CharField(

@@ -176,7 +176,9 @@ def send_mails(mailing: Mailing) -> None:
         send_time = timezone.localtime()
         print(send_time)
         attempts_list.append(
-            Attempt(mailing=mailing, recipient=recipient, status=status, server_response=smtp_response, send_time=send_time)
+            Attempt(
+                mailing=mailing, recipient=recipient, status=status, server_response=smtp_response, send_time=send_time
+            )
         )
         time.sleep(time_to_sleep)
     Attempt.objects.bulk_create(attempts_list)
