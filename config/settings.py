@@ -9,6 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
+
 DEBUG = True
 
 ALLOWED_HOSTS: list = []
@@ -70,6 +72,7 @@ AUTH_USER_MODEL = "users.CustomUser"
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "distribution:main"
 LOGOUT_REDIRECT_URL = "distribution:main"
+PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", 86400))
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",

@@ -19,6 +19,7 @@ class CustomUser(AbstractUser):
         help_text="Список получателей",
         blank=True,
     )
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         """Настройки отображения"""

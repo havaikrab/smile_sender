@@ -45,6 +45,9 @@
 
         </div>
         <div class="col-9">
+            {% for message in messages %}
+                <p class="sp-msg-{{message.tags}}">{{message}}</p>
+            {% endfor %}
 
             {% block content %}{% endblock %}
 
