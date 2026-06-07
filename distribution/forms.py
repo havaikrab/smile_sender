@@ -19,7 +19,7 @@ class SingleRecipientForm(forms.ModelForm):
         """Класс настроек формы"""
 
         model = Recipient
-        fields = ["email", "first_name", "middle_name", "last_name", "comment"]
+        fields = ("email", "first_name", "middle_name", "last_name", "comment")
 
     def __init__(self, *args: Any, **kwargs: Any):
         """Стилизация формы"""
@@ -27,14 +27,11 @@ class SingleRecipientForm(forms.ModelForm):
         super(SingleRecipientForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        email_field = Field("email", wrapper_class="sp-bfc mb-5 mt-2")
-        first_name = Field("first_name", wrapper_class="sp-bfc my-5")
-        middle_name = Field("middle_name", wrapper_class="sp-bfc my-5")
-        last_name = Field("last_name", wrapper_class="sp-bfc my-5")
-        comment_field = Field("comment", wrapper_class="sp-bfc my-5")
+        email_field = Field("email", wrapper_class="mb-5 mt-2")
+        others_fields = [Field(field, wrapper_class="my-5") for field in SingleRecipientForm.Meta.fields[1:]]
         submit_button = Submit("submit", "Сохранить")
         submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
-        self.helper.layout = Layout(email_field, first_name, middle_name, last_name, comment_field, submit_button)
+        self.helper.layout = Layout(email_field, *others_fields, submit_button)
 
 
 class UploadRecipientListForm(forms.Form):
@@ -49,10 +46,9 @@ class UploadRecipientListForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.fields["excel_file"].widget = forms.FileInput(attrs={"accept": ".xlsx"})
-        file = Field("excel_file", wrapper_class="sp-bfc mt-2")
         submit_button = Submit("submit", "Отправить")
         submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
-        self.helper.layout = Layout(file, submit_button)
+        self.helper.layout = Layout("excel_file", submit_button)
 
     def clean_excel_file(self) -> File:
         """Проверка расширения загружаемого файла"""
@@ -72,7 +68,7 @@ class MessageForm(forms.ModelForm):
         """Класс настроек формы"""
 
         model = Message
-        fields = ["title", "content"]
+        fields = ("title", "content")
 
     def __init__(self, *args: Any, **kwargs: Any):
         """Стилизация формы"""
@@ -80,8 +76,8 @@ class MessageForm(forms.ModelForm):
         super(MessageForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        title_field = Field("title", wrapper_class="sp-bfc mb-5 mt-2")
-        content_field = Field("content", wrapper_class="sp-bfc my-5")
+        title_field = Field("title", wrapper_class="mt-2")
+        content_field = Field("content", wrapper_class="my-5")
         submit_button = Submit("submit", "Сохранить")
         submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
         instance = self.instance
@@ -101,7 +97,7 @@ class MailingForm(forms.ModelForm):
         """Класс настроек формы"""
 
         model = Mailing
-        fields = ["start_time", "end_time", "message", "recipients"]
+        fields = ("start_time", "end_time", "message", "recipients")
         widgets = {
             "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -123,10 +119,10 @@ class MailingForm(forms.ModelForm):
             default_end = timezone.localtime() + datetime.timedelta(hours=2)
         self.initial["start_time"] = datetime.datetime.strftime(default_start, "%Y-%m-%dT%H:%M")
         self.initial["end_time"] = datetime.datetime.strftime(default_end, "%Y-%m-%dT%H:%M")
-        start_time = Field("start_time", wrapper_class="sp-bfc mb-5 mt-2", css_class="sp-bfc")
-        end_time = Field("end_time", wrapper_class="sp-bfc my-5", css_class="sp-bfc")
-        message_field = Field("message", wrapper_class="sp-bfc my-5")
-        recipients = Field("recipients", wrapper_class="sp-bfc my-5", css_class="sp-check-scroll")
+        start_time = Field("start_time", wrapper_class="mb-5 mt-2", css_class="sp-bfc")
+        end_time = Field("end_time", wrapper_class="my-5", css_class="sp-bfc")
+        message_field = Field("message", wrapper_class="my-5")
+        recipients = Field("recipients", wrapper_class="my-5", css_class="sp-check-scroll")
         submit_button = Submit("submit", "Сохранить")
         submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
         if instance and instance.pk:
