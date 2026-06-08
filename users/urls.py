@@ -4,7 +4,14 @@ from django.urls import path
 from . import views
 from .apps import UsersConfig
 from .forms import CustomUserLoginForm
-from .views import CustomUserDeleteView, CustomUserPasswordChangeView, CustomUserProfileView, CustomUserUpdateView
+from .views import (
+    CustomUserDeleteView,
+    CustomUserPasswordChangeView,
+    CustomUserPasswordRemakeView,
+    CustomUserPasswordResetView,
+    CustomUserProfileView,
+    CustomUserUpdateView,
+)
 
 app_name = UsersConfig.name
 
@@ -17,4 +24,6 @@ urlpatterns: list = [
     path("update/", CustomUserUpdateView.as_view(), name="update"),
     path("password_change/", CustomUserPasswordChangeView.as_view(), name="password_change"),
     path("delete/", CustomUserDeleteView.as_view(), name="delete"),
+    path("password_reset/", CustomUserPasswordResetView.as_view(), name="password_reset"),
+    path("password_remake/<uidb64>/<token>/", CustomUserPasswordRemakeView.as_view(), name="password_remake"),
 ]

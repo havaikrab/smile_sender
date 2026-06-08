@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.urls import reverse
 
 from config.settings import EMAIL_HOST_USER, SITE_URL
 from distribution.services import distribution_logger
@@ -10,7 +11,7 @@ def send_activate_link(user: CustomUser) -> None:
     """Отправляет только что зарегистрировавшемуся пользователю ссылку для активации аккаунта"""
 
     token = default_token_generator.make_token(user)
-    activation_link = f"{SITE_URL}/users/activate/{user.pk}/{token}/"
+    activation_link = f"{SITE_URL}/{reverse('users:activate', kwargs={'pk': user.pk, 'token': token})}"
     message = f"""Вы зарегистрировались в Smile Sender, для активации аккаунта и первого логина перейдите по ссылке
 {activation_link}"""
     try:

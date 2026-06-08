@@ -2,13 +2,14 @@ from typing import Any, Optional
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.views import PasswordChangeView, PasswordResetConfirmView, PasswordResetView
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -16,7 +17,14 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from distribution.services import distribution_logger
 
-from .forms import CustomUserCreationForm, CustomUserDeleteForm, CustomUserPasswordChangeForm, CustomUserUpdateForm
+from .forms import (
+    CustomUserCreationForm,
+    CustomUserDeleteForm,
+    CustomUserPasswordChangeForm,
+    CustomUserPasswordResetForm,
+    CustomUserPasswordSetForm,
+    CustomUserUpdateForm,
+)
 from .models import CustomUser
 from .services import send_activate_link
 
@@ -131,3 +139,50 @@ class CustomUserDeleteView(LoginRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context["delete_profile"] = True
         return context
+
+    def form_valid(self, form: CustomUserDeleteForm) -> HttpResponse:
+        """Добавление лога и сообщения в шаблон об удалении аккаунта"""
+
+        messages.success(self.request, "Ваш аккаунт был удален")
+        distribution_logger.info(f"Аккаунт, зарегистрированный на {self.object.email}, был удален.")
+        return super().form_valid(form)
+
+
+class CustomUserPasswordResetView(PasswordResetView):
+    """Контроллер ссылки для сброса пароля от аккаунта, для его дальнейшего восстановления"""
+
+    template_name = "users/login.html"
+    form_class = CustomUserPasswordResetForm
+    success_url = reverse_lazy("distribution:main")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Добавление флага для отображения шаблона в режиме сброса пароля от аккаунта"""
+
+        context = super().get_context_data(**kwargs)
+        context["reset_password"] = True
+        return context
+
+
+class CustomUserPasswordRemakeView(PasswordResetConfirmView):
+    """Контроллер страницы переопределения пароля от аккаунта"""
+
+    template_name = "users/login.html"
+    form_class = CustomUserPasswordSetForm
+    success_url = reverse_lazy("distribution:main")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Добавление флага для отображения шаблона в режиме переопределения пароля от аккаунта"""
+
+        context = super().get_context_data(**kwargs)
+        context["remake_password"] = True
+        return context
+
+    def form_valid(self, form: SetPasswordForm) -> HttpResponse:
+        """Добавление лога и сообщения в шаблон об удалении аккаунта"""
+
+        messages.success(self.request, "Пароль был успешно изменен")
+        if isinstance(self.user, CustomUser):
+            distribution_logger.info(f"Пароль аккаунта, зарегистрированного на {self.user.email}, был изменен.")
+        else:
+            distribution_logger.warning("Попытка переустановить пароль у несуществующего аккаунта")
+        return super().form_valid(form)

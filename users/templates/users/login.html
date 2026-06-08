@@ -6,7 +6,16 @@
     <div class="row">
         <div class="col-3"></div>
         <form class="col-6 sp-cont px-5 py-4 mt-5 me-5" method="post">
-            <h3 class="text-center my-3 fw-bold sp-bfc">Авторизация</h3>
+            {% if reset_password %}
+                <h3 class="text-center my-3 fw-bold sp-bfc">Восстановление пароля</h3>
+                <p class="text-start sp-bfc my-1">Введите адрес электронной почты, к которой привязан ваш аккаунт и нажмите "Подтвердить".</p>
+                <p class="text-start sp-bfc my-1">На указанный адрес будет отправлена ссылка для восстановления пароля.</p>
+                <p class="text-start sp-bfc mt-1 mb-5">Перейдите по полученной ссылке и укажите новый пароль от аккаунта.</p>
+            {% elif remake_password %}
+                <h3 class="text-center my-3 fw-bold sp-bfc">Придумайте новый пароль</h3>
+            {% else %}
+                <h3 class="text-center my-3 fw-bold sp-bfc">Авторизация</h3>
+            {% endif %}
             {% csrf_token %}
             {% crispy form %}
         </form>
