@@ -2,7 +2,7 @@ from typing import Any
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Div, Field, Layout, Submit
-from django.contrib.auth.forms import AuthenticationForm, UserChangeForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm, UserCreationForm
 from django.urls import reverse
 
 from .models import CustomUser
@@ -71,3 +71,20 @@ class CustomUserUpdateForm(UserChangeForm):
         cancel_button = HTML(f'<a href="{cancel_url}"class="p-2 mt-5 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
         buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
         self.helper.layout = Layout(last_name, *others_fields, buttons_div)
+
+
+class CustomUserPasswordChangeForm(PasswordChangeForm):
+    """Форма для смены пароля от аккаунта"""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Стилизация формы"""
+
+        super(CustomUserPasswordChangeForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        submit_button = Submit("submit", "Подтвердить")
+        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
+        cancel_url = reverse("users:profile")
+        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-5 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
+        buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
+        self.helper.layout = Layout("old_password", "new_password1", "new_password2", buttons_div)

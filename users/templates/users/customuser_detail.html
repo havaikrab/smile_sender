@@ -36,11 +36,11 @@
             </div>
             <div class="row ms-4">
                 <a class="col-5 p-2 mt-3 me-3 sp-nav-but sp-bfc text-center  fs-5" href="{% url 'users:update' %}">Редактировать</a>
-                <a class="col-5 p-2 mt-3 me-3 sp-nav-but sp-bfc text-center  fs-5" href="#">Сменить пароль</a>
+                <a class="col-5 p-2 mt-3 me-3 sp-nav-but sp-bfc text-center  fs-5" href="{% url 'users:password_change' %}">Сменить пароль</a>
                 <a class="col-6 p-2 my-3 me-3 sp-dngr-but sp-bfc text-center  fs-5" href="#">Удалить страницу</a>
             </div>
         </div>
-        {% if update %}
+        {% if update or password_change %}
             <form class="col-5 sp-cont px-5 py-4 mt-5 m-4" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% crispy form %}

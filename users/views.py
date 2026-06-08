@@ -5,6 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import PasswordChangeView
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.http.response import HttpResponseRedirect
@@ -15,7 +16,7 @@ from django.views.generic import CreateView, DetailView, UpdateView
 
 from distribution.services import distribution_logger
 
-from .forms import CustomUserCreationForm, CustomUserUpdateForm
+from .forms import CustomUserCreationForm, CustomUserPasswordChangeForm, CustomUserUpdateForm
 from .models import CustomUser
 from .services import send_activate_link
 
@@ -94,4 +95,19 @@ class CustomUserUpdateView(LoginRequiredMixin, UpdateView):
 
         context = super().get_context_data(**kwargs)
         context["update"] = True
+        return context
+
+
+class CustomUserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    """Контроллер страницы смены пароля от аккаунта"""
+
+    template_name = "users/customuser_detail.html"
+    form_class = CustomUserPasswordChangeForm
+    success_url = reverse_lazy("users:profile")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Добавление флага для отображения шаблона в режиме смены пароля"""
+
+        context = super().get_context_data(**kwargs)
+        context["password_change"] = True
         return context
