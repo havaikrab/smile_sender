@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-3"></div>
+        <form class="col-6 sp-cont px-5 py-4 mt-5 me-5" method="post">
+            <h3 class="text-center my-3 fw-bold sp-bfc">Авторизация</h3>
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+{% endblock %}

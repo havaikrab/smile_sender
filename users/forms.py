@@ -2,7 +2,7 @@ from typing import Any
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from .models import CustomUser
 
@@ -27,3 +27,17 @@ class CustomUserCreationForm(UserCreationForm):
         submit_button = Submit("submit", "Зарегистрироваться")
         submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
         self.helper.layout = Layout(first_name, *others_fields, submit_button)
+
+
+class CustomUserLoginForm(AuthenticationForm):
+    """Форма авторизации пользователя"""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Стилизация формы"""
+
+        super(CustomUserLoginForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        submit_button = Submit("submit", "Войти")
+        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
+        self.helper.layout = Layout("username", "password", submit_button)
