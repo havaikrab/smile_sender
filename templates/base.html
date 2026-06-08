@@ -9,37 +9,34 @@
     <link href="{% static 'css/custom_style.css' %}" rel="stylesheet" type="text/css">
 </head>
 <body class="sp-gr-bckgrnd">
-
-{% if user.is_authenticated %}
     <div class="row">
         <div class="col-2" style="color: red">
-            Аватар
+            <img src="{% static 'icons/logo.svg' %}" alt="Логотип">
         </div>
-        <div class="col-8">
-            {% block header %} {% endblock %}
-        </div>
-        <div class="col-2 d-flex flex-column sp-auth px-4 py-3">
-            <a class="p-2 my-2 sp-auth-but sp-bfc text-center" href="#">Профиль</a>
-            <form method="post" action="{% url 'users:logout' %}">
-                {% csrf_token %}
-                <button type="submit"  class="p-2 my-2 sp-auth-but sp-bfc text-center" style="width:100%">Выйти</button>
-            </form>
-        </div>
-    </div>
-{% else %}
-    <div class="row m-0">
-        <div class="col-2" style="color: red"></div>
-        <div class="col-8">
-            <h1 class="text-center mt-5 fw-bold sp-bfc">Добро пожаловать в Smile Sender!</h1>
-            <h6 class="text-center m-3 fw-bold sp-bfc">Пожалуйста, авторизуйтесь, чтобы получить доступ к сервису массовых рассылок</h6>
-        </div>
-        <div class="col-2 d-flex flex-column sp-auth p-3">
-            <a class="p-2 m-2 sp-auth-but sp-bfc text-center" href="{% url 'users:register' %}">Зарегистрироваться</a>
-            <a class="p-2 m-2 sp-auth-but sp-bfc text-center" href="{% url 'users:login' %}">Войти</a>
-        </div>
-    </div>
-{% endif %}
+        {% if user.is_authenticated %}
+            <div class="col-8">
 
+                {% block header %} {% endblock %}
+
+            </div>
+            <div class="col-2 d-flex flex-column sp-auth px-4 py-3">
+                <a class="p-2 my-3 sp-auth-but sp-bfc text-center fs-5" href="{% url 'users:profile' %}">Профиль</a>
+                <form method="post" action="{% url 'users:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit"  class="p-2 my-3 sp-auth-but sp-bfc text-center  fs-5" style="width:100%">Выйти</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="col-8">
+                <h1 class="text-center mt-5 fw-bold sp-bfc">Добро пожаловать в Smile Sender!</h1>
+                <h6 class="text-center m-3 fw-bold sp-bfc">Пожалуйста, авторизуйтесь, чтобы получить доступ к сервису массовых рассылок</h6>
+            </div>
+            <div class="col-2 d-flex flex-column sp-auth p-3">
+                <a class="p-2 m-3 sp-auth-but sp-bfc text-center  fs-5" href="{% url 'users:register' %}">Зарегистрироваться</a>
+                <a class="p-2 m-3 sp-auth-but sp-bfc text-center  fs-5" href="{% url 'users:login' %}">Войти</a>
+            </div>
+        {% endif %}
+    </div>
     <hr class="my-4" style="border: none; height: 2px; background-color: green; opacity: 0.2;">
     <div class="row me-0">
         <div class="col-3">

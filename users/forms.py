@@ -1,8 +1,9 @@
 from typing import Any
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit
+from crispy_forms.layout import HTML, Div, Field, Layout, Submit
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.urls import reverse
 
 from .models import CustomUser
 
@@ -39,5 +40,9 @@ class CustomUserLoginForm(AuthenticationForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         submit_button = Submit("submit", "Войти")
-        submit_button.field_classes = "p-2 mt-5 sp-nav-but sp-bfc text-center fs-5"
-        self.helper.layout = Layout("username", "password", submit_button)
+        submit_button.field_classes = "p-2 mt-3 sp-nav-but sp-bfc text-center fs-5"
+        restore_password_link = reverse("distribution:main")
+        restore_button = HTML(f"""<a href="{restore_password_link}"class="p-2 mt-3 sp-nav-but sp-bfc text-center fs-5">
+            Восстановить пароль</a>""")
+        buttons_div = Div(submit_button, restore_button, css_class="d-flex gap-3")
+        self.helper.layout = Layout("username", "password", buttons_div)

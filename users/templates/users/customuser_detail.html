@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Личные данные</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-5">
+            <div class="sp-cont sp-bfc m-4 mt-5 p-0">
+                <h6 class="mx-3 mt-3">Фамилия:</h6>
+                <h4 class="mx-3 my-2">{{user.last_name}}</h4>
+                <hr style="border: none; height: 1px; background-color: green; opacity: 0.2;">
+                <h6 class="mx-3 mt-3">Имя:</h6>
+                <h4 class="mx-3 my-2">{{user.first_name}}</h4>
+                <hr style="border: none; height: 1px; background-color: green; opacity: 0.2;">
+                <h6 class="mx-3 mt-3">Электронная почта:</h6>
+                <h4 class="mx-3 my-2">{{user.email}}</h4>
+                <hr style="border: none; height: 1px; background-color: green; opacity: 0.2;">
+                <h6 class="mx-3 mt-3">Имя пользователя в Smile Sender:</h6>
+                <h4 class="mx-3 my-2">{{user.username}}</h4>
+                <hr style="border: none; height: 1px; background-color: green; opacity: 0.2;">
+                <h6 class="mx-3 mt-3">Организация:</h6>
+                {% if user.company %}
+                    <h4 class="mx-3 my-2">{{user.company}}</h4>
+                {% endif %}
+                <hr style="border: none; height: 1px; background-color: green; opacity: 0.2;">
+                {% if user.phone %}
+                    <h6 class="mx-3 mt-3">Телефон:</h6>
+                    <h4 class="mx-3 my-2">{{user.phone}}</h4>
+                {% else %}
+                    <h6 class="mx-3 mt-3 mb-3">Телефон:</h6>
+                {% endif %}
+            </div>
+            <div class="row ms-4">
+                <a class="col-5 p-2 mt-3 me-3 sp-nav-but sp-bfc text-center  fs-5" href="#">Редактировать</a>
+                <a class="col-5 p-2 mt-3 me-3 sp-nav-but sp-bfc text-center  fs-5" href="#">Сменить пароль</a>
+                <a class="col-6 p-2 my-3 me-3 sp-dngr-but sp-bfc text-center  fs-5" href="#">Удалить страницу</a>
+            </div>
+        </div>
+        {% if update %}
+        <div class="col-5 sp-cont m-4 mt-5">
+            Форма
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

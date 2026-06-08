@@ -1,14 +1,17 @@
-from typing import Any
+from typing import Any, Optional
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 
 from distribution.services import distribution_logger
 
@@ -61,3 +64,14 @@ class CustomUserActivationView(View):
             distribution_logger.error("Попытка активировать несуществующий аккаунт пользователя")
             messages.error(self.request, "Ссылка для активации не действительна")
         return redirect(reverse("distribution:main"))
+
+
+class CustomUserProfileView(LoginRequiredMixin, DetailView):
+    """Контроллер страницы профиля пользователя"""
+
+    model = CustomUser
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> AbstractBaseUser | AnonymousUser:
+        """Определение объекта авторизованного пользователя"""
+
+        return self.request.user
