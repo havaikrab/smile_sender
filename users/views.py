@@ -12,11 +12,11 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from distribution.services import distribution_logger
 
-from .forms import CustomUserCreationForm, CustomUserPasswordChangeForm, CustomUserUpdateForm
+from .forms import CustomUserCreationForm, CustomUserDeleteForm, CustomUserPasswordChangeForm, CustomUserUpdateForm
 from .models import CustomUser
 from .services import send_activate_link
 
@@ -110,4 +110,24 @@ class CustomUserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 
         context = super().get_context_data(**kwargs)
         context["password_change"] = True
+        return context
+
+
+class CustomUserDeleteView(LoginRequiredMixin, DeleteView):
+    """Контроллер страницы подтверждения удаления аккаунта"""
+
+    template_name = "users/customuser_detail.html"
+    form_class = CustomUserDeleteForm
+    success_url = reverse_lazy("distribution:main")
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> AbstractBaseUser | AnonymousUser:
+        """Определение объекта удаляемого пользователя"""
+
+        return self.request.user
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Добавление флага для отображения шаблона в режиме удаления аккаунта"""
+
+        context = super().get_context_data(**kwargs)
+        context["delete_profile"] = True
         return context
