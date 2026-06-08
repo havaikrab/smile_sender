@@ -4,7 +4,7 @@ from django.urls import path
 from . import views
 from .apps import UsersConfig
 from .forms import CustomUserLoginForm
-from .views import CustomUserProfileView
+from .views import CustomUserProfileView, CustomUserUpdateView
 
 app_name = UsersConfig.name
 
@@ -14,4 +14,5 @@ urlpatterns: list = [
     path("login/", LoginView.as_view(template_name="users/login.html", form_class=CustomUserLoginForm), name="login"),
     path("logout/", LogoutView.as_view(next_page="distribution:main"), name="logout"),
     path("profile/", CustomUserProfileView.as_view(), name="profile"),
+    path("update/", CustomUserUpdateView.as_view(), name="update"),
 ]
