@@ -4,6 +4,7 @@ import time
 from io import BytesIO
 
 import openpyxl
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.base import File
 from django.core.mail import send_mail
@@ -16,6 +17,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from config.settings import EMAIL_HOST_USER
 from distribution.models import Attempt, Mailing, Recipient
+from users.models import CustomUser
 
 distribution_logger = logging.getLogger("distribution_logger")
 os.makedirs("logs/", exist_ok=True)
@@ -200,3 +202,27 @@ def execute_mailing(mailing_id: int) -> None:
         distribution_logger.error(f"{exc}")
     else:
         send_mails(mailing)
+
+
+def get_statistics(user: AbstractBaseUser | AnonymousUser) -> dict:
+    """Возвращает словарь статистики для главной страницы приложения"""
+
+    grouped_context = group_context(Mailing.objects.all())
+    time_now = timezone.now()
+    started_list = grouped_context["started"]
+    active_mailing = [mailing for mailing in started_list if mailing.start_time <= time_now <= mailing.end_time]
+    grouped_context["active_count"] = len(active_mailing)
+    try:
+        max_id = Mailing.objects.latest("id").pk
+    except ObjectDoesNotExist:
+        max_id = 0
+    grouped_context["total_mailing"] = max_id
+    grouped_context["recipients_count"] = Recipient.objects.count()
+    if isinstance(user, CustomUser):
+        users_attempts = Attempt.objects.filter(mailing__message__author=user)
+        grouped_context["total_attempts"] = len(users_attempts)
+        success_attempts = users_attempts.filter(status="success")
+        grouped_context["success_attempts"] = len(success_attempts)
+        failed_attempts = users_attempts.filter(status="fail")
+        grouped_context["failed_attempts"] = len(failed_attempts)
+    return grouped_context

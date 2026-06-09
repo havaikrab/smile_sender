@@ -5,6 +5,17 @@
 {% endblock %}
 
 {% block content %}
-
-    <h1 class="text-center sp-bfc">Здесь будет статистика</h1>
+    {% if user.is_authenticated %}
+        <h1 class="text-center sp-bfc">Статистика</h1>
+        <hr class="my-4" style="border: none; height: 2px; background-color: green; opacity: 0.2;">
+        <h2 class="text-start sp-bfc">Всего попыток отправления писем: {{total_attempts}}.</h2>
+        <h2 class="text-start sp-bfc">Успешных отправлений: {{success_attempts}}.</h2>
+        <h2 class="text-start sp-bfc">Неудачных попыток: {{failed_attempts}}.</h2>
+    {% else %}
+        <h1 class="text-center sp-bfc">Smile Sender сегодня</h1>
+        <hr class="my-4" style="border: none; height: 2px; background-color: green; opacity: 0.2;">
+        <h2 class="text-start sp-bfc">Всего созданных рассылок: {{total_mailing}}.</h2>
+        <h2 class="text-start sp-bfc">Активных рассылок: {{active_count}}.</h2>
+        <h2 class="text-start sp-bfc">Уникальных получателей: {{recipients_count}}.</h2>
+    {% endif %}
 {% endblock %}

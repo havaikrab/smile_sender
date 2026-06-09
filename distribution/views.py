@@ -14,7 +14,7 @@ from config.settings import USE_CELERY
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
-from .services import ExcelManager, execute_mailing, group_context
+from .services import ExcelManager, execute_mailing, get_statistics, group_context
 from .tasks import shared_send_mailing_task
 
 
@@ -22,6 +22,14 @@ class HomeView(TemplateView):
     """Контроллер главной страницы приложения distribution"""
 
     template_name = "distribution/home_page.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Вывод в шаблон статистики приложения"""
+
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context.update(get_statistics(user))
+        return context
 
 
 class RecipientListView(ListView):
@@ -155,6 +163,12 @@ class MessageCreateView(CreateView):
         if isinstance(self_object, Message):
             return reverse("distribution:message_detail", kwargs={"pk": self_object.pk})
         return reverse("distribution:messages")
+
+    def form_valid(self, form: MessageForm) -> HttpResponse:
+        """Указание авторизованного пользователя в качестве автора письма"""
+
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
 
 class MessageUpdateView(UpdateView):
