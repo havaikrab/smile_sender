@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 from django.contrib import messages
@@ -11,12 +10,12 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
+from config.settings import USE_CELERY
+
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
 from .services import ExcelManager, execute_mailing, group_context
 from .tasks import shared_send_mailing_task
-
-USE_CELERY = os.getenv("USE_CELERY", "").lower() == "true"
 
 
 class HomeView(TemplateView):

@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "").lower() == "true"
 
 ALLOWED_HOSTS: list = []
 
@@ -115,12 +115,16 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-CACHES = {
-    "default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": "redis://127.0.0.1:6379/1"}
-}
+REDIS_URL = "redis://" + os.getenv("REDIS_HOST", "127.0.0.1") + ":" + os.getenv("REDIS_PORT", "6379") + "/"
+CACHE_DB = os.getenv("CACHE_DB", "1")
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": f"{REDIS_URL}{CACHE_DB}"}}
+
+USE_CELERY = os.getenv("USE_CELERY", "").lower() == "true"
+CELERY_BROKER_DB = os.getenv("CELERY_BROKER_DB", "2")
+CELERY_BROKER_URL = f"{REDIS_URL}{CELERY_BROKER_DB}"
+CELERY_RESULT_DB = os.getenv("CELERY_RESULT_DB", "3")
+CELERY_RESULT_BACKEND = f"{REDIS_URL}{CELERY_RESULT_DB}"
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_TASK_TRACK_STARTED = os.getenv("CELERY_TASK_TRACK_STARTED", "") == "true"
+CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", "3600"))
