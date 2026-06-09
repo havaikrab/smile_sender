@@ -18,7 +18,7 @@ class Command(BaseCommand):
         return [mailing for mailing in mailing_list if mailing.start_time <= time_now <= mailing.end_time]
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Запись данных приложения catalog в файл fixture/fixture_catalog.json"""
+        """Выводит в консоль информацию о рассылках, готовых к запуску"""
 
         mailing_list = self.__prepare_queryset()
         print("\nСписок рассылок, готовых к запуску:\n")

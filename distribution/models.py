@@ -89,6 +89,7 @@ class Mailing(models.Model):
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
         ordering = ["status", "message"]
+        permissions = [("stop_mailing", "Может остановить рассылку")]
 
 
 class Attempt(models.Model):

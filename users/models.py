@@ -27,9 +27,13 @@ class CustomUser(AbstractUser):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         ordering = ["email"]
+        permissions = [
+            ("block_customuser", "Может заблокировать аккаунт пользователя"),
+            ("unblock_customuser", "Может разблокировать аккаунт пользователя"),
+        ]
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    REQUIRED_FIELDS = ["username", "is_active"]
 
     def __str__(self) -> str:
         """Строковое представление пользователя"""

@@ -15,7 +15,7 @@ class Command(BaseCommand):
         parser.add_argument("--id", type=int, help="id рассылки из базы данных")
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Запись данных приложения catalog в файл fixture/fixture_catalog.json"""
+        """Запускает указанную рассылку"""
 
         mailing_id = options.get("id", 0)
         execute_mailing(mailing_id)
