@@ -5,6 +5,7 @@ from io import BytesIO
 
 import openpyxl
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.base import File
 from django.core.mail import send_mail
@@ -158,31 +159,46 @@ def send_mails(mailing: Mailing) -> None:
     fail_count = 0
     attempts_list = list()
     time_to_sleep = int(os.getenv("SENDING_INTERVAL", 300))
+    key = f"continue_mailing_{mailing.pk}"
+    time_to_end = mailing.end_time - timezone.now()
+    time_to_life = time_to_end.total_seconds()
+    cache.add(key, "continue", time_to_life)
     for recipient in recipients:
-        try:
-            send_mail(
-                mailing.message.title,
-                mailing.message.content,
-                from_email=EMAIL_HOST_USER,
-                recipient_list=[recipient.email],
-                fail_silently=False,
+        continue_mailing = cache.get(key)
+        if continue_mailing == "continue":
+            try:
+                send_mail(
+                    mailing.message.title,
+                    mailing.message.content,
+                    from_email=EMAIL_HOST_USER,
+                    recipient_list=[recipient.email],
+                    fail_silently=False,
+                )
+                smtp_response = "250 OK: message accepted for delivery"
+                status = "success"
+                success_count += 1
+            except Exception as exc:
+                smtp_response = str(exc)
+                status = "fail"
+                distribution_logger.warning(f"Ошибка при обращении к SMTP-серверу: {exc}.")
+                fail_count += 1
+            send_time = timezone.localtime()
+            attempts_list.append(
+                Attempt(
+                    mailing=mailing,
+                    recipient=recipient,
+                    status=status,
+                    server_response=smtp_response,
+                    send_time=send_time,
+                )
             )
-            smtp_response = "250 OK: message accepted for delivery"
-            status = "success"
-            success_count += 1
-        except Exception as exc:
-            smtp_response = str(exc)
-            status = "fail"
-            distribution_logger.warning(f"Ошибка при обращении к SMTP-серверу: {exc}.")
-            fail_count += 1
-        send_time = timezone.localtime()
-        print(send_time)
-        attempts_list.append(
-            Attempt(
-                mailing=mailing, recipient=recipient, status=status, server_response=smtp_response, send_time=send_time
-            )
-        )
-        time.sleep(time_to_sleep)
+            time.sleep(time_to_sleep)
+        else:
+            if continue_mailing == "stopped":
+                distribution_logger.warning(f"Рассылка id{mailing.pk} была принудительно завершена.")
+            else:
+                distribution_logger.warning(f"Рассылка id{mailing.pk} была завершена. Истек заявленный срок действия.")
+            break
     Attempt.objects.bulk_create(attempts_list)
     mailing.status = "completed"
     mailing.save()
