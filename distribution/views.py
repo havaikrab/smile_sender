@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.files.base import File
 from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
@@ -266,12 +267,20 @@ class MailingDeleteView(DeleteView):
         context["confirm_delete"] = True
         return context
 
+    def form_valid(self, form: BaseForm) -> HttpResponse:
+        """Запрет на удаление запущенных рассылок"""
+
+        if self.object.status == "started":
+            messages.error(self.request, "Перед удалением рассылки ее необходимо остановить.")
+            return redirect("distribution:mailing_detail", pk=self.object.pk)
+        return super().form_valid(form)
+
 
 class MailingStartView(View):
     """Контроллер запуска процесса рассылки писем"""
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
-        """"""
+        """Получение команды на запуск рассылки и ее запуск"""
 
         mailing = get_object_or_404(Mailing, pk=pk)
         if mailing.status != "created":
@@ -282,4 +291,23 @@ class MailingStartView(View):
         else:
             execute_mailing(pk)
         messages.success(request, f'Рассылка "{mailing.message.title}" запущена')
+        return redirect("distribution:mailing_detail", pk=pk)
+
+
+class MailingStopView(View):
+    """Контроллер остановки процесса рассылки писем"""
+
+    def post(self, request: HttpRequest, pk: int) -> HttpResponse:
+        """Получение команды на остановку рассылки и установка в кеше отметки о ее завершении"""
+
+        mailing = get_object_or_404(Mailing, pk=pk)
+        key = f"continue_mailing_{mailing.pk}"
+        time_to_end = mailing.end_time - timezone.now()
+        time_to_life = time_to_end.total_seconds()
+        cache_status = cache.get(key)
+        if cache_status == "continue":
+            cache.set(key, "stopped", time_to_life)
+        messages.success(request, f'Рассылка "{mailing.message.title}" остановлена.')
+        mailing.status = "completed"
+        mailing.save()
         return redirect("distribution:mailing_detail", pk=pk)
