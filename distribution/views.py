@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, Optional
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.core.files.base import File
 from django.db.models import QuerySet
 from django.forms import BaseForm
@@ -14,6 +15,7 @@ from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
 from config.settings import USE_CELERY
+from users.models import CustomUser
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
@@ -212,7 +214,7 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("distribution:mailing_list")
 
     def get_form_kwargs(self) -> dict:
-        """Передача в форму списка созданных им писем"""
+        """Передача в форму списка созданных пользователем писем"""
 
         kwargs = super().get_form_kwargs()
         user = self.request.user
@@ -253,10 +255,20 @@ class MailingManagementListView(LoginRequiredMixin, PermissionRequiredMixin, Lis
         return context
 
 
-class MailingDetailView(DetailView):
+class MailingDetailView(LoginRequiredMixin, DetailView):
     """Контроллер страницы рассылки"""
 
     model = Mailing
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Mailing:
+        """Ограничение доступа к странице пользователям, не являющимися автором сообщения или менеджером приложения"""
+
+        mailing = super().get_object()
+        user = self.request.user
+        if isinstance(user, CustomUser) and isinstance(mailing, Mailing):
+            if mailing.message.author == user or user.has_perm("distribution.view_mailing"):
+                return mailing
+        raise PermissionDenied
 
     def get_context_data(self, **kwargs: Any) -> dict:
         """Установка флагов для отображения шаблона в штатном режиме"""
@@ -268,11 +280,33 @@ class MailingDetailView(DetailView):
         return context
 
 
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     """Контроллер страницы редактирования рассылки"""
 
     model = Mailing
     form_class = MailingForm
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Mailing:
+        """Ограничение доступа к странице пользователям, не являющимися автором сообщения"""
+
+        mailing = super().get_object()
+        user = self.request.user
+        if (
+            isinstance(user, CustomUser)
+            and isinstance(mailing, Mailing)
+            and mailing.status == "created"
+            and mailing.message.author == user
+        ):
+            return mailing
+        raise PermissionDenied
+
+    def get_form_kwargs(self) -> dict:
+        """Передача в форму списка созданных пользователем писем"""
+
+        kwargs = super().get_form_kwargs()
+        user = self.request.user
+        kwargs["user_messages"] = Message.objects.filter(author=user)
+        return kwargs
 
     def get_success_url(self) -> str:
         """Редирект на страницу текущей рассылки после завершения редактирования"""
@@ -290,20 +324,26 @@ class MailingDeleteView(DeleteView):
     template_name = "distribution/mailing_detail.html"
     success_url = reverse_lazy("distribution:mailing_list")
 
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Mailing:
+        """Ограничение доступа к странице пользователям, не являющимися автором сообщения"""
+
+        mailing = super().get_object()
+        user = self.request.user
+        if (
+            isinstance(user, CustomUser)
+            and isinstance(mailing, Mailing)
+            and mailing.status != "started"
+            and mailing.message.author == user
+        ):
+            return mailing
+        raise PermissionDenied
+
     def get_context_data(self, **kwargs: Any) -> dict:
         """Установка флага для отображения шаблона в режиме удаления"""
 
         context = super().get_context_data(**kwargs)
         context["confirm_delete"] = True
         return context
-
-    def form_valid(self, form: BaseForm) -> HttpResponse:
-        """Запрет на удаление запущенных рассылок"""
-
-        if self.object.status == "started":
-            messages.error(self.request, "Перед удалением рассылки ее необходимо остановить.")
-            return redirect("distribution:mailing_detail", pk=self.object.pk)
-        return super().form_valid(form)
 
 
 class MailingStartView(View):
