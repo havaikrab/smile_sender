@@ -1,5 +1,5 @@
 import datetime
-from typing import Any
+from typing import Any, cast
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Div, Field, Layout, Submit
@@ -107,6 +107,7 @@ class MailingForm(forms.ModelForm):
     def __init__(self, *args: Any, **kwargs: Any):
         """Стилизация формы"""
 
+        user_messages = kwargs.pop("user_messages")
         super(MailingForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
@@ -121,6 +122,8 @@ class MailingForm(forms.ModelForm):
         self.initial["end_time"] = datetime.datetime.strftime(default_end, "%Y-%m-%dT%H:%M")
         start_time = Field("start_time", wrapper_class="mb-5 mt-2", css_class="sp-bfc")
         end_time = Field("end_time", wrapper_class="my-5", css_class="sp-bfc")
+        self.fields["message"] = cast(forms.ModelChoiceField, self.fields["message"])
+        self.fields["message"].queryset = user_messages  # type: ignore
         message_field = Field("message", wrapper_class="my-5")
         recipients = Field("recipients", wrapper_class="my-5", css_class="sp-check-scroll")
         submit_button = Submit("submit", "Сохранить")

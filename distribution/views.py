@@ -1,8 +1,10 @@
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.cache import cache
 from django.core.files.base import File
+from django.db.models import QuerySet
 from django.forms import BaseForm
 from django.http import FileResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -202,18 +204,46 @@ class MessageDeleteView(DeleteView):
         return context
 
 
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     """Контроллер страницы создания рассылки"""
 
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy("distribution:mailing_list")
 
+    def get_form_kwargs(self) -> dict:
+        """Передача в форму списка созданных им писем"""
 
-class MailingListView(ListView):
+        kwargs = super().get_form_kwargs()
+        user = self.request.user
+        kwargs["user_messages"] = Message.objects.filter(author=user)
+        return kwargs
+
+
+class MailingListView(LoginRequiredMixin, ListView):
     """Контроллер страницы списка рассылок"""
 
     model = Mailing
+
+    def get_queryset(self) -> QuerySet:
+        """Отображение пользователю только его собственных рассылок"""
+
+        user = self.request.user
+        return super().get_queryset().filter(message__author=user)
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Передача в шаблон словаря сгруппированных по значению статуса объектов рассылок"""
+
+        context = super().get_context_data(**kwargs)
+        context["sorted_objects"] = group_context(context["object_list"])
+        return context
+
+
+class MailingManagementListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    """Контроллер страницы всех рассылок, доступна только менеджерам приложения"""
+
+    model = Mailing
+    permission_required = ("distribution.view_mailing",)
 
     def get_context_data(self, **kwargs: Any) -> dict:
         """Передача в шаблон словаря сгруппированных по значению статуса объектов рассылок"""
