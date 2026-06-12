@@ -38,9 +38,6 @@
             </div>
         </div>
     </div>
-    {% for message in messages %}
-        <p class="sp-msg-{{message.tags}} mt-4">{{message}}</p>
-    {% endfor %}
     {% if normal_mode %}
         <div class="d-flex gap-3 my-5">
             {% if ready and object.message.author == user %}
@@ -52,13 +49,15 @@
             {% if object.status == 'created' and object.message.author == user %}
                 <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:update_mailing' pk=object.pk %}">Редактировать</a>
             {% endif %}
-            {% if object.status == 'started' %}
-                {% if perms.distribution.stop_mailing %}
+            {% if stop_button %}
+                {% if object.message.author == user or perms.distribution.stop_mailing %}
                     <form method="post" action="{% url 'distribution:stop_mailing' pk=object.pk %}">
                         {% csrf_token %}
                         <button type="submit" class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5">Остановить</button>
                     </form>
                 {% endif %}
+            {% elif not stop_button and object.status == 'started' %}
+                <h5 class="sp-bfc">Рассылка завершена, статус обновится в ближайшее время</h5>
             {% endif %}
             {% if object.status != 'started' and object.message.author == user %}
                 <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_mailing' pk=object.pk %}">Удалить</a>

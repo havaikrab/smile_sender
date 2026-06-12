@@ -271,11 +271,15 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         raise PermissionDenied
 
     def get_context_data(self, **kwargs: Any) -> dict:
-        """Установка флагов для отображения шаблона в штатном режиме"""
+        """Установка флагов для отображения шаблона в штатном режиме и отображения кнопки для остановки рассылки"""
 
         context = super().get_context_data(**kwargs)
         if self.object.start_time <= timezone.now() <= self.object.end_time and self.object.status == "created":
             context["ready"] = True
+        key = f"continue_mailing_{self.object.pk}"
+        continue_flag = cache.get(key)
+        if continue_flag == "continue":
+            context["stop_button"] = True
         context["normal_mode"] = True
         return context
 
@@ -353,15 +357,18 @@ class MailingStartView(View):
         """Получение команды на запуск рассылки и ее запуск"""
 
         mailing = get_object_or_404(Mailing, pk=pk)
+        user = self.request.user
         if mailing.status != "created":
             messages.error(request, f"Рассылка со статусом {mailing.status} не может быть запущена повторно.")
             return redirect("distribution:mailing_detail", pk=pk)
+        if mailing.message.author != user:
+            raise PermissionDenied
         if USE_CELERY:
             shared_send_mailing_task.delay(pk)
         else:
             execute_mailing(pk)
         messages.success(request, f'Рассылка "{mailing.message.title}" запущена')
-        return redirect("distribution:mailing_detail", pk=pk)
+        return redirect("distribution:mailing_list", pk=pk)
 
 
 class MailingStopView(View):
@@ -371,6 +378,13 @@ class MailingStopView(View):
         """Получение команды на остановку рассылки и установка в кеше отметки о ее завершении"""
 
         mailing = get_object_or_404(Mailing, pk=pk)
+        user = self.request.user
+        if (
+            isinstance(user, CustomUser)
+            and mailing.message.author != user
+            and not user.has_perm("distribution.stop_mailing")
+        ):
+            raise PermissionDenied
         key = f"continue_mailing_{mailing.pk}"
         time_to_end = mailing.end_time - timezone.now()
         time_to_life = time_to_end.total_seconds()
@@ -378,6 +392,4 @@ class MailingStopView(View):
         if cache_status == "continue":
             cache.set(key, "stopped", time_to_life)
         messages.success(request, f'Рассылка "{mailing.message.title}" остановлена.')
-        mailing.status = "completed"
-        mailing.save()
         return redirect("distribution:mailing_detail", pk=pk)
