@@ -40,9 +40,10 @@ class ExcelManager:
         "E": "comment",
     }
 
-    def __init__(self, form: BaseForm, excel_file: File):
+    def __init__(self, user: CustomUser, form: BaseForm, excel_file: File):
         """Создание менеджера для загружаемого excel-файла"""
 
+        self.__user = user
         self.__file = excel_file
         self.__form = form
         self.__sheet = Workbook().active
@@ -62,36 +63,70 @@ class ExcelManager:
                 raise KeyError
         self.__sheet = sheet
 
-    def create_recipients(self) -> None:
-        """Запись информации о получателях рассылок в БД"""
+    def create_recipients(self) -> list:
+        """Записывает информацию о получателях рассылок в БД и возвращает список созданных или полученных объектов"""
 
+        valid_recipients = list()
         if isinstance(self.__sheet, Worksheet):
-            existing_emails = list(Recipient.objects.all().values_list("email", flat=True))
-            uploaded_emails = set([self.__sheet[f"A{row}"].value for row in range(2, self.__sheet.max_row + 1)])
-            new_emails = uploaded_emails.difference(existing_emails)
-            new_emails.discard(None)
-            new_emails.discard("")
-            valid_recipients = list()
             for row in range(2, self.__sheet.max_row + 1):
                 recipient_dict = {v: self.__sheet[f"{k}{row}"].value for k, v in ExcelManager.__columns.items()}
-                row_email = recipient_dict["email"]
-                if row_email in new_emails:
+                try:
+                    recipient = Recipient.objects.get(email=recipient_dict["email"])
+                    valid_recipients.append(recipient)
+                except ObjectDoesNotExist:
                     try:
                         recipient = Recipient(**recipient_dict)
                         recipient.full_clean()
                         valid_recipients.append(recipient)
-                        self.report["success_operations"].append(
-                            f"Получатель №{row} с email {row_email} добавлен в базу данных"
-                        )
                     except ValidationError:
                         self.report["invalid_rows"].append(str(row))
-                    new_emails.discard(row_email)
-                else:
-                    if row_email is not None and row_email != "":
-                        self.report["existing_objects"].append(
-                            f"Получатель №{row} с email {row_email} уже существует в базе данных"
-                        )
-            Recipient.objects.bulk_create(valid_recipients, ignore_conflicts=True)
+        Recipient.objects.bulk_create(valid_recipients, ignore_conflicts=True)
+        return valid_recipients
+
+    def set_user_customers_relations(self, customers: list[Recipient]) -> None:
+        """Устанавливает связь авторизованного пользователя с переданным списком получателей"""
+
+        user_customers_emails = list(self.__user.customers.all().values_list("email", flat=True))
+        added_customers = list()
+        for customer in customers:
+            if customer.email in user_customers_emails:
+                self.report["existing_objects"].append(
+                    f"Email {customer.email} уже зарегистрирован в списке получателей."
+                )
+            else:
+                added_customers.append(customer)
+                self.report["success_operations"].append(f"Добавлен получатель с email {customer.email}.")
+        self.__user.customers.add(*added_customers)
+
+        #
+        # existing_emails = list(Recipient.objects.all().values_list("email", flat=True))
+        # user_emails = list(self.__user.customers.all().values_list("email", flat=True))
+        # uploaded_emails = set([self.__sheet[f"A{row}"].value for row in range(2, self.__sheet.max_row + 1)])
+        # uploaded_emails.discard(None)
+        # uploaded_emails.discard("")
+        # new_emails = uploaded_emails.difference(existing_emails)
+        # valid_recipients = list()
+        # for row in range(2, self.__sheet.max_row + 1):
+        #     recipient_dict = {v: self.__sheet[f"{k}{row}"].value for k, v in ExcelManager.__columns.items()}
+        #     row_email = recipient_dict["email"]
+        #     if row_email in new_emails:
+        #         try:
+        #             recipient = Recipient(**recipient_dict)
+        #             recipient.full_clean()
+        #             valid_recipients.append(recipient)
+        #             self.report["success_operations"].append(
+        #                 f"Получатель №{row} с email {row_email} добавлен в базу данных"
+        #             )
+        #         except ValidationError:
+        #             self.report["invalid_rows"].append(str(row))
+        #         new_emails.discard(row_email)
+        #     else:
+        #         if row_email is not None and row_email != "":
+        #             self.report["existing_objects"].append(
+        #                 f"Получатель №{row} с email {row_email} уже существует в базе данных"
+        #             )
+        # Recipient.objects.bulk_create(valid_recipients, ignore_conflicts=True)
+        # return valid_recipients
 
     @staticmethod
     def send_excel_form() -> FileResponse:
@@ -102,6 +137,13 @@ class ExcelManager:
         if isinstance(current_sheet, Worksheet):
             current_sheet.title = "recipients"
             current_sheet.append(("email", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("rfeeqagh@rfv.rfv", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("qqtgbqagh@tgb.tgb", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("qqergnqazx@yhn.yhn", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("ujmqazx@ujmjm", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("ujmqazx@ujmjm.tt", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("ujmqazx@ujmqqq", "first_name", "middle_name", "last_name", "comment"))
+            current_sheet.append(("ujmqazx@ujooo", "first_name", "middle_name", "last_name", "comment"))
         buffer = BytesIO()
         new_excel.save(buffer)
         buffer.seek(0)

@@ -37,10 +37,32 @@ class HomeView(TemplateView):
         return context
 
 
-class RecipientListView(ListView):
-    """Контроллер страницы списка получателей"""
+class RecipientManagementListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    """Контроллер страницы списка всех получателей, доступной только менеджерам приложения"""
 
     model = Recipient
+    permission_required = ("view_recipient",)
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Установка флага для отображения шаблона без ссылок на действия с объектами получателей"""
+
+        context = super().get_context_data(**kwargs)
+        context["management"] = True
+        return context
+
+
+class RecipientListView(LoginRequiredMixin, ListView):
+    """Контроллер страницы пользовательского списка получателей"""
+
+    model = Recipient
+
+    def get_queryset(self) -> QuerySet:
+        """Определение личного списка получателей для каждого пользователя"""
+
+        user = self.request.user
+        if isinstance(user, CustomUser):
+            return user.customers.all()
+        raise PermissionDenied
 
 
 class SingleRecipientCreateView(CreateView):
@@ -48,17 +70,16 @@ class SingleRecipientCreateView(CreateView):
 
     model = Recipient
     form_class = SingleRecipientForm
-    template_name = "distribution/recipient_list.html"
     success_url = reverse_lazy("distribution:recipients")
 
-    def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей
-        и установка флага для отображения формы создания нового получателя рассылок"""
+    def form_valid(self, form: SingleRecipientForm) -> HttpResponse:
+        """Установка связи созданного объекта получателя с авторизованным пользователем"""
 
-        context = super().get_context_data(**kwargs)
-        context["object_list"] = Recipient.objects.all()
-        context["form_exist"] = True
-        return context
+        recipient = form.save()
+        user = self.request.user
+        if isinstance(user, CustomUser):
+            user.customers.add(recipient)
+        return redirect(self.success_url)
 
 
 class RecipientUpdateView(UpdateView):
@@ -66,32 +87,39 @@ class RecipientUpdateView(UpdateView):
 
     model = Recipient
     form_class = SingleRecipientForm
-    template_name = "distribution/recipient_list.html"
+    template_name = "distribution/recipient_form.html"
     success_url = reverse_lazy("distribution:recipients")
 
-    def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей
-        и установка флага для отображения формы редактирования информации о получателе рассылок"""
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Recipient:
+        """Проверка отношения получателя к зарегистрированному пользователю"""
 
-        context = super().get_context_data(**kwargs)
-        context["object_list"] = Recipient.objects.all()
-        context["form_exist"] = True
-        return context
+        user = self.request.user
+        recipient = super().get_object()
+        if isinstance(user, CustomUser) and isinstance(recipient, Recipient) and user.customers.contains(recipient):
+            return recipient
+        raise PermissionDenied
 
 
 class RecipientDeleteView(DeleteView):
     """Контроллер удаления информации о получателе"""
 
     model = Recipient
-    template_name = "distribution/recipient_list.html"
+    template_name = "distribution/recipient_form.html"
     success_url = reverse_lazy("distribution:recipients")
 
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Recipient:
+        """Проверка отношения получателя к зарегистрированному пользователю"""
+
+        user = self.request.user
+        recipient = super().get_object()
+        if isinstance(user, CustomUser) and isinstance(recipient, Recipient) and user.customers.contains(recipient):
+            return recipient
+        raise PermissionDenied
+
     def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей
-        и установка флага для отображения формы удаления информации о получателе рассылок"""
+        """Установка флага для отображения формы удаления информации о получателе рассылок"""
 
         context = super().get_context_data(**kwargs)
-        context["object_list"] = Recipient.objects.all()
         context["confirm_delete"] = True
         return context
 
@@ -105,33 +133,26 @@ class DownloadRecipientsFormView(View):
         return ExcelManager.send_excel_form()
 
 
-class UploadRecipientListView(FormView):
+class UploadRecipientListView(LoginRequiredMixin, FormView):
     """Контроллер загрузки информации о получателях из excel-файла"""
 
     form_class = UploadRecipientListForm
-    template_name = "distribution/recipient_list.html"
+    template_name = "distribution/recipient_form.html"
     success_url = reverse_lazy("distribution:recipients")
-
-    def get_context_data(self, **kwargs: Any) -> dict:
-        """Вывод в шаблон списка существующих получателей
-        и установка флага для отображения формы загрузки excel-файла с информацией о получателях рассылок"""
-
-        context = super().get_context_data(**kwargs)
-        context["object_list"] = Recipient.objects.all()
-        context["upload_exist"] = True
-        return context
 
     def form_valid(self, form: BaseForm) -> HttpResponse:
         """Чтение загруженного файла и запись данных в БД"""
 
         file = self.request.FILES.get("excel_file")
-        if isinstance(file, File):
-            data_manager = ExcelManager(form, file)
+        user = self.request.user
+        if isinstance(file, File) and isinstance(user, CustomUser):
+            data_manager = ExcelManager(user, form, file)
             try:
                 data_manager.check_file()
             except KeyError:
                 return super().form_invalid(form)
-            data_manager.create_recipients()
+            new_recipients = data_manager.create_recipients()
+            data_manager.set_user_customers_relations(new_recipients)
             if len(data_manager.report["success_operations"]) > 0:
                 messages.success(self.request, "\n".join(data_manager.report["success_operations"]))
             if len(data_manager.report["existing_objects"]) > 0:

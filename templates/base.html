@@ -46,7 +46,7 @@
         </div>
         <div class="col-9">
             {% for message in messages %}
-                <p class="sp-msg-{{message.tags}}">{{message}}</p>
+                <p class="sp-msg-{{message.tags}}">{{message|linebreaksbr}}</p>
             {% endfor %}
 
             {% block content %}{% endblock %}

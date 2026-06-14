@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список получателей рассылок</h1>
+{% endblock %}
+
+{% block content %}
+    {% if not confirm_delete %}
+        <div class="row">
+            <form class="col-6 sp-cont px-5 py-4 mt-5 me-5" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% crispy form %}
+            </form>
+        </div>
+    {% else %}
+        <div class="sp-cont p-4 me-5">
+            <h5 class="sp-bfc mb-3">
+                Вы действительно хотите удалить информацию о получателе
+                {% if object.first_name and object.last_name %}
+                    {{object.first_name}} {{object.last_name}}?
+                {% elif object.first_name and not object.last_name %}
+                    {{object.first_name}}?
+                {% elif not object.first_name and object.last_name %}
+                    {{object.last_name}}?
+                {% elif not object.first_name and not object.last_name %}
+                    {{object.email}}?
+                {% endif %}
+            </h5>
+            <form method="post" enctype="multipart/form-data" style="display: flex">
+                {% csrf_token %}
+                <button type="submit" class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-5">Удалить</button>
+                <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:recipients' %}">Отмена</a>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}
