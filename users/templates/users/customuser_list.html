@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список пользователей</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="sp-cont p-3 me-2 mt-5">
+        <table class="sp-bfc" style="width:100%; table-layout: fixed">
+            <thead>
+                <tr class="text-start sp-bfc" style="border-bottom: 3px solid rgb(80, 200, 20)">
+                    <th scope="col" style="width:15%; padding: 8px">E-mail</th>
+                    <th scope="col" style="width:10%; padding: 8px">Ник</th>
+                    <th scope="col" style="width:9%; padding: 8px">Фамилия</th>
+                    <th scope="col" style="width:9%; padding: 8px">Имя</th>
+                    <th scope="col" style="width:10%; padding: 8px">Организация</th>
+                    <th scope="col" style="width:10%; padding: 8px">Телефон</th>
+                    <th scope="col" style="width:9%; padding: 8px">Статус активации</th>
+                    <th scope="col" style="width:9%; padding: 8px">Статус блокировки</th>
+                    <th scope="col" style="width:9%; padding: 8px">Должность</th>
+                    <th scope="col" style="width:10%; padding: 8px">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in object_list %}
+                    <tr class="text-start sp-bfc" style="border-bottom: 1px solid rgba(80, 200, 20, 0.2)">
+                        <td style="padding: 8px">{{user.email}}</td>
+                        <td style="padding: 8px">{{user.username}}</td>
+                        <td style="padding: 8px; white-space: nowrap; overflow: hidden;">{{user.last_name}}</td>
+                        <td style="padding: 8px; white-space: nowrap; overflow: hidden;">{{user.first_name}}</td>
+                        <td style="padding: 8px; white-space: nowrap; overflow: hidden;">{{user.company|default:""}}</td>
+                        <td style="padding: 8px">{{user.phone|default:""}}</td>
+                        <td style="padding: 8px">
+                            {% if user.is_active %}
+                                Активирован
+                            {% else %}
+                                Не активирован
+                            {% endif %}
+                        </td>
+                        <td style="padding: 8px">Блок</td>
+                        <td style="padding: 8px">Группы</td>
+                        <td style="padding: 8px">Назначить</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

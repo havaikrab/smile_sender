@@ -3,7 +3,7 @@ from typing import Any, Optional
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import SetPasswordForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordChangeView, PasswordResetConfirmView, PasswordResetView
@@ -13,7 +13,7 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, ListView
 
 from distribution.services import distribution_logger
 
@@ -186,3 +186,11 @@ class CustomUserPasswordRemakeView(PasswordResetConfirmView):
         else:
             distribution_logger.warning("Попытка переустановить пароль у несуществующего аккаунта")
         return super().form_valid(form)
+
+
+class CustomUserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    """Контроллер страницы всех зарегистрированных пользователей"""
+
+    model = CustomUser
+    permission_required = ("view_customuser",)
+

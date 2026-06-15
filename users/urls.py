@@ -11,6 +11,7 @@ from .views import (
     CustomUserPasswordResetView,
     CustomUserProfileView,
     CustomUserUpdateView,
+    CustomUserListView,
 )
 
 app_name = UsersConfig.name
@@ -26,4 +27,5 @@ urlpatterns: list = [
     path("delete/", CustomUserDeleteView.as_view(), name="delete"),
     path("password_reset/", CustomUserPasswordResetView.as_view(), name="password_reset"),
     path("password_remake/<uidb64>/<token>/", CustomUserPasswordRemakeView.as_view(), name="password_remake"),
+    path("list/", CustomUserListView.as_view(), name="users_list"),
 ]

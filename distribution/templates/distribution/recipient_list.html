@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-{% load crispy_forms_tags %}
-
 {% block header %}
     <h1 class="text-center sp-bfc mt-5 fw-bold">Список получателей рассылок</h1>
 {% endblock %}
@@ -45,7 +43,7 @@
             <tbody>
                 {% for recipient in object_list %}
                     <tr class="text-start sp-bfc" style="border-bottom: 1px solid rgba(80, 200, 20, 0.2)">
-                        <td style="padding: 10px">{{recipient.email|default:""}}</td>
+                        <td style="padding: 10px">{{recipient.email}}</td>
                         <td style="padding: 10px">{{recipient.last_name|default:""}}</td>
                         <td style="padding: 10px">{{recipient.first_name|default:""}}</td>
                         <td style="padding: 10px">{{recipient.middle_name|default:""}}</td>
