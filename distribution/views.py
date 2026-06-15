@@ -193,7 +193,7 @@ class MessageDetailView(LoginRequiredMixin, DetailView):
         raise PermissionDenied
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     """Контроллер создания сообщения рассылки"""
 
     model = Message
@@ -214,11 +214,20 @@ class MessageCreateView(CreateView):
         return super().form_valid(form)
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     """Контроллер редактирования сообщения рассылки"""
 
     model = Message
     form_class = MessageForm
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Message:
+        """Проверка, является ли зарегистрированный пользователь автором письма"""
+
+        user = self.request.user
+        message = super().get_object()
+        if isinstance(user, CustomUser) and isinstance(message, Message) and message.author == user:
+            return message
+        raise PermissionDenied
 
     def get_success_url(self) -> str:
         """Редирект на страницу текущего сообщения после завершения редактирования"""
@@ -229,12 +238,21 @@ class MessageUpdateView(UpdateView):
         return reverse("distribution:messages")
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     """Контроллер удаления сообщения рассылки"""
 
     model = Message
     template_name = "distribution/message_detail.html"
     success_url = reverse_lazy("distribution:messages")
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Message:
+        """Проверка, является ли зарегистрированный пользователь автором письма"""
+
+        user = self.request.user
+        message = super().get_object()
+        if isinstance(user, CustomUser) and isinstance(message, Message) and message.author == user:
+            return message
+        raise PermissionDenied
 
     def get_context_data(self, **kwargs: Any) -> dict:
         """Установка флага для отображения шаблона в режиме удаления"""
