@@ -164,16 +164,33 @@ class UploadRecipientListView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
 
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     """Контроллер страницы списка сообщений"""
 
     model = Message
 
+    def get_queryset(self) -> QuerySet:
+        """Отображение пользователю только тех писем, автором которых он является"""
 
-class MessageDetailView(DetailView):
+        user = self.request.user
+        if isinstance(user, CustomUser):
+            return user.messages.all()
+        raise PermissionDenied
+
+
+class MessageDetailView(LoginRequiredMixin, DetailView):
     """Контроллер страницы одного сообщения"""
 
     model = Message
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Message:
+        """Проверка, является ли зарегистрированный пользователь автором письма"""
+
+        user = self.request.user
+        message = super().get_object()
+        if isinstance(user, CustomUser) and isinstance(message, Message) and message.author == user:
+            return message
+        raise PermissionDenied
 
 
 class MessageCreateView(CreateView):
@@ -239,7 +256,8 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
 
         kwargs = super().get_form_kwargs()
         user = self.request.user
-        kwargs["user_messages"] = Message.objects.filter(author=user)
+        if isinstance(user, CustomUser):
+            kwargs["user_messages"] = Message.objects.filter(author=user)
         return kwargs
 
 
@@ -330,7 +348,8 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
 
         kwargs = super().get_form_kwargs()
         user = self.request.user
-        kwargs["user_messages"] = Message.objects.filter(author=user)
+        if isinstance(user, CustomUser):
+            kwargs["user_messages"] = Message.objects.filter(author=user)
         return kwargs
 
     def get_success_url(self) -> str:
