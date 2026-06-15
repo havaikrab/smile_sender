@@ -13,6 +13,7 @@ from .views import (
     CustomUserPasswordResetView,
     CustomUserProfileView,
     CustomUserUpdateView,
+    SetCustomUserGroupView,
 )
 
 app_name = UsersConfig.name
@@ -35,4 +36,5 @@ urlpatterns: list = [
         name="block_from_mailing",
     ),
     path("block_switch/<int:pk>/", CustomUserChangeBlockedStatusView.as_view(), name="block_from_users_list"),
+    path("set_group/<int:pk>/", SetCustomUserGroupView.as_view(), name="set_group"),
 ]

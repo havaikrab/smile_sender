@@ -13,7 +13,7 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
 from distribution.services import distribution_logger
 
@@ -24,9 +24,10 @@ from .forms import (
     CustomUserPasswordResetForm,
     CustomUserPasswordSetForm,
     CustomUserUpdateForm,
+    SetCustomUserGroupForm,
 )
 from .models import CustomUser
-from .services import send_activate_link
+from .services import CheckManagerMixin, send_activate_link
 
 
 class CustomUserRegisterView(CreateView):
@@ -75,7 +76,7 @@ class CustomUserActivationView(View):
         return redirect(reverse("distribution:main"))
 
 
-class CustomUserProfileView(LoginRequiredMixin, DetailView):
+class CustomUserProfileView(LoginRequiredMixin, CheckManagerMixin, DetailView):
     """Контроллер страницы профиля пользователя"""
 
     model = CustomUser
@@ -86,7 +87,7 @@ class CustomUserProfileView(LoginRequiredMixin, DetailView):
         return self.request.user
 
 
-class CustomUserUpdateView(LoginRequiredMixin, UpdateView):
+class CustomUserUpdateView(LoginRequiredMixin, CheckManagerMixin, UpdateView):
     """Контроллер страницы редактирования личных данных пользователя"""
 
     template_name = "users/customuser_detail.html"
@@ -106,7 +107,7 @@ class CustomUserUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class CustomUserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+class CustomUserPasswordChangeView(LoginRequiredMixin, CheckManagerMixin, PasswordChangeView):
     """Контроллер страницы смены пароля от аккаунта"""
 
     template_name = "users/customuser_detail.html"
@@ -121,7 +122,7 @@ class CustomUserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
         return context
 
 
-class CustomUserDeleteView(LoginRequiredMixin, DeleteView):
+class CustomUserDeleteView(LoginRequiredMixin, CheckManagerMixin, DeleteView):
     """Контроллер страницы подтверждения удаления аккаунта"""
 
     template_name = "users/customuser_detail.html"
@@ -188,11 +189,11 @@ class CustomUserPasswordRemakeView(PasswordResetConfirmView):
         return super().form_valid(form)
 
 
-class CustomUserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class CustomUserListView(LoginRequiredMixin, PermissionRequiredMixin, CheckManagerMixin, ListView):
     """Контроллер страницы всех зарегистрированных пользователей"""
 
     model = CustomUser
-    permission_required = ("view_customuser",)
+    permission_required = ("users.view_customuser",)
 
 
 class CustomUserChangeBlockedStatusView(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -219,3 +220,22 @@ class CustomUserChangeBlockedStatusView(LoginRequiredMixin, PermissionRequiredMi
         else:
             distribution_logger.info(f"Пользователь с e-mail {user.email} разблокирован.")
         return next_page
+
+
+class SetCustomUserGroupView(LoginRequiredMixin, PermissionRequiredMixin, CheckManagerMixin, FormView):
+    """Контроллер страницы добавления пользователя в определенную группу персонала"""
+
+    form_class = SetCustomUserGroupForm
+    template_name = "users/set_user_group.html"
+    success_url = reverse_lazy("users:users_list")
+    permission_required = ("auth.change_group",)
+
+    def form_valid(self, form: SetCustomUserGroupForm) -> HttpResponse:
+        """Определение пользователя в выбранные группы персонала"""
+
+        user_pk = self.kwargs.get("pk")
+        user = CustomUser.objects.get(pk=user_pk)
+        groups = form.cleaned_data.get("groups")
+        if isinstance(groups, QuerySet):
+            user.groups.add(*groups)
+        return redirect("users:users_list")

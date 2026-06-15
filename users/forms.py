@@ -10,8 +10,9 @@ from django.contrib.auth.forms import (
     UserChangeForm,
     UserCreationForm,
 )
+from django.contrib.auth.models import Group
 from django.core.mail import send_mail as base_send_mail
-from django.forms import ModelForm, PasswordInput
+from django.forms import CheckboxSelectMultiple, Form, ModelForm, ModelMultipleChoiceField, PasswordInput
 from django.urls import reverse
 
 from config.settings import EMAIL_HOST_USER, SITE_URL
@@ -178,3 +179,28 @@ class CustomUserPasswordSetForm(SetPasswordForm):
         cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 mt-5 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
         buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3")
         self.helper.layout = Layout("new_password1", "new_password2", buttons_div)
+
+
+class SetCustomUserGroupForm(Form):
+    """Форма для добавления пользователя в определенную группу персонала"""
+
+    groups = ModelMultipleChoiceField(
+        queryset=Group.objects.all(),
+        widget=CheckboxSelectMultiple(attrs={"size": "3"}),
+        required=True,
+        label="Группы персонала",
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Стилизация формы"""
+
+        super(SetCustomUserGroupForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        groups = Field("groups", css_class="sp-check-scroll")
+        submit_button = Submit("submit", "Назначить")
+        submit_button.field_classes = "p-2 sp-nav-but sp-bfc text-center fs-5"
+        cancel_url = reverse("users:users_list")
+        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
+        buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3 mt-5")
+        self.helper.layout = Layout(groups, buttons_div)

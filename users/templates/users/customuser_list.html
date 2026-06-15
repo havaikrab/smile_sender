@@ -38,7 +38,7 @@
                         </td>
                         <td style="padding: 5px">Группы</td>
                         <td style="padding: 5px">
-                            <div class="m-3">
+                            <div class="my-3">
                                 <form method="post" enctype="multipart/form-data" action="{% url 'users:block_from_users_list' pk=object.pk %}">
                                     {% csrf_token %}
                                     {% if object.is_blocked %}
@@ -47,7 +47,9 @@
                                         <button type="submit" class="py-1 px-3 my-3 sp-dngr-but sp-bfc text-center fs-6">Заблокировать</button>
                                     {% endif %}
                                 </form>
-                                <a class="py-1 px-3 my-3 sp-nav-but sp-bfc text-center fs-6" href="#">Назначить</a>
+                                {% if user.is_superuser %}
+                                    <a class="py-1 px-3 my-3 sp-nav-but sp-bfc text-center fs-6" href="{% url 'users:set_group' pk=object.pk %}">Назначить</a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

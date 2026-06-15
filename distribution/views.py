@@ -16,6 +16,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 
 from config.settings import USE_CELERY
 from users.models import CustomUser
+from users.services import CheckManagerMixin
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
@@ -23,7 +24,7 @@ from .services import ExcelManager, execute_mailing, get_statistics, group_conte
 from .tasks import shared_send_mailing_task
 
 
-class HomeView(TemplateView):
+class HomeView(CheckManagerMixin, TemplateView):
     """Контроллер главной страницы приложения distribution"""
 
     template_name = "distribution/home_page.html"
@@ -37,11 +38,11 @@ class HomeView(TemplateView):
         return context
 
 
-class RecipientManagementListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class RecipientManagementListView(LoginRequiredMixin, PermissionRequiredMixin, CheckManagerMixin, ListView):
     """Контроллер страницы списка всех получателей, доступной только менеджерам приложения"""
 
     model = Recipient
-    permission_required = ("view_recipient",)
+    permission_required = ("distribution.view_recipient",)
 
     def get_context_data(self, **kwargs: Any) -> dict:
         """Установка флага для отображения шаблона без ссылок на действия с объектами получателей"""
@@ -51,7 +52,7 @@ class RecipientManagementListView(LoginRequiredMixin, PermissionRequiredMixin, L
         return context
 
 
-class RecipientListView(LoginRequiredMixin, ListView):
+class RecipientListView(LoginRequiredMixin, CheckManagerMixin, ListView):
     """Контроллер страницы пользовательского списка получателей"""
 
     model = Recipient
@@ -65,7 +66,7 @@ class RecipientListView(LoginRequiredMixin, ListView):
         raise PermissionDenied
 
 
-class SingleRecipientCreateView(CreateView):
+class SingleRecipientCreateView(CheckManagerMixin, CreateView):
     """Контроллер добавления одного получателя рассылок через интерфейс приложения"""
 
     model = Recipient
@@ -82,7 +83,7 @@ class SingleRecipientCreateView(CreateView):
         return redirect(self.success_url)
 
 
-class RecipientUpdateView(UpdateView):
+class RecipientUpdateView(CheckManagerMixin, UpdateView):
     """Контроллер редактирования информации о получателе"""
 
     model = Recipient
@@ -100,7 +101,7 @@ class RecipientUpdateView(UpdateView):
         raise PermissionDenied
 
 
-class RecipientDeleteView(DeleteView):
+class RecipientDeleteView(CheckManagerMixin, DeleteView):
     """Контроллер удаления информации о получателе"""
 
     model = Recipient
@@ -133,7 +134,7 @@ class DownloadRecipientsFormView(View):
         return ExcelManager.send_excel_form()
 
 
-class UploadRecipientListView(LoginRequiredMixin, FormView):
+class UploadRecipientListView(LoginRequiredMixin, CheckManagerMixin, FormView):
     """Контроллер загрузки информации о получателях из excel-файла"""
 
     form_class = UploadRecipientListForm
@@ -164,7 +165,7 @@ class UploadRecipientListView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
 
-class MessageListView(LoginRequiredMixin, ListView):
+class MessageListView(LoginRequiredMixin, CheckManagerMixin, ListView):
     """Контроллер страницы списка сообщений"""
 
     model = Message
@@ -178,7 +179,7 @@ class MessageListView(LoginRequiredMixin, ListView):
         raise PermissionDenied
 
 
-class MessageDetailView(LoginRequiredMixin, DetailView):
+class MessageDetailView(LoginRequiredMixin, CheckManagerMixin, DetailView):
     """Контроллер страницы одного сообщения"""
 
     model = Message
@@ -193,7 +194,7 @@ class MessageDetailView(LoginRequiredMixin, DetailView):
         raise PermissionDenied
 
 
-class MessageCreateView(LoginRequiredMixin, CreateView):
+class MessageCreateView(LoginRequiredMixin, CheckManagerMixin, CreateView):
     """Контроллер создания сообщения рассылки"""
 
     model = Message
@@ -214,7 +215,7 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class MessageUpdateView(LoginRequiredMixin, UpdateView):
+class MessageUpdateView(LoginRequiredMixin, CheckManagerMixin, UpdateView):
     """Контроллер редактирования сообщения рассылки"""
 
     model = Message
@@ -238,7 +239,7 @@ class MessageUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("distribution:messages")
 
 
-class MessageDeleteView(LoginRequiredMixin, DeleteView):
+class MessageDeleteView(LoginRequiredMixin, CheckManagerMixin, DeleteView):
     """Контроллер удаления сообщения рассылки"""
 
     model = Message
@@ -262,7 +263,7 @@ class MessageDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class MailingCreateView(LoginRequiredMixin, CreateView):
+class MailingCreateView(LoginRequiredMixin, CheckManagerMixin, CreateView):
     """Контроллер страницы создания рассылки"""
 
     model = Mailing
@@ -279,7 +280,7 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
 
-class MailingListView(LoginRequiredMixin, ListView):
+class MailingListView(LoginRequiredMixin, CheckManagerMixin, ListView):
     """Контроллер страницы списка рассылок"""
 
     model = Mailing
@@ -298,7 +299,7 @@ class MailingListView(LoginRequiredMixin, ListView):
         return context
 
 
-class MailingManagementListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class MailingManagementListView(LoginRequiredMixin, PermissionRequiredMixin, CheckManagerMixin, ListView):
     """Контроллер страницы всех рассылок, доступна только менеджерам приложения"""
 
     model = Mailing
@@ -312,7 +313,7 @@ class MailingManagementListView(LoginRequiredMixin, PermissionRequiredMixin, Lis
         return context
 
 
-class MailingDetailView(LoginRequiredMixin, DetailView):
+class MailingDetailView(LoginRequiredMixin, CheckManagerMixin, DetailView):
     """Контроллер страницы рассылки"""
 
     model = Mailing
@@ -338,13 +339,10 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         if continue_flag == "continue":
             context["stop_button"] = True
         context["normal_mode"] = True
-        user = self.request.user
-        if user.groups.filter(name="manager").exists() or user.is_superuser:
-            context["manager"] = True
         return context
 
 
-class MailingUpdateView(LoginRequiredMixin, UpdateView):
+class MailingUpdateView(LoginRequiredMixin, CheckManagerMixin, UpdateView):
     """Контроллер страницы редактирования рассылки"""
 
     model = Mailing
@@ -382,7 +380,7 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("distribution:mailing_list")
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, CheckManagerMixin, DeleteView):
     """Контроллер удаления рассылки"""
 
     model = Mailing
@@ -390,7 +388,7 @@ class MailingDeleteView(DeleteView):
     success_url = reverse_lazy("distribution:mailing_list")
 
     def get_object(self, queryset: Optional[QuerySet] = None) -> Mailing:
-        """Ограничение доступа к странице пользователям, не являющимися автором сообщения"""
+        """Ограничение доступа к странице рассылки пользователям, не являющимися автором сообщения"""
 
         mailing = super().get_object()
         user = self.request.user
@@ -411,7 +409,7 @@ class MailingDeleteView(DeleteView):
         return context
 
 
-class MailingStartView(View):
+class MailingStartView(LoginRequiredMixin, View):
     """Контроллер запуска процесса рассылки писем"""
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
@@ -432,7 +430,7 @@ class MailingStartView(View):
         return redirect("distribution:mailing_list", pk=pk)
 
 
-class MailingStopView(View):
+class MailingStopView(LoginRequiredMixin, View):
     """Контроллер остановки процесса рассылки писем"""
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
