@@ -137,13 +137,6 @@ class ExcelManager:
         if isinstance(current_sheet, Worksheet):
             current_sheet.title = "recipients"
             current_sheet.append(("email", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("rfeeqagh@rfv.rfv", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("qqtgbqagh@tgb.tgb", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("qqergnqazx@yhn.yhn", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("ujmqazx@ujmjm", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("ujmqazx@ujmjm.tt", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("ujmqazx@ujmqqq", "first_name", "middle_name", "last_name", "comment"))
-            current_sheet.append(("ujmqazx@ujooo", "first_name", "middle_name", "last_name", "comment"))
         buffer = BytesIO()
         new_excel.save(buffer)
         buffer.seek(0)

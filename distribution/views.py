@@ -338,6 +338,9 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         if continue_flag == "continue":
             context["stop_button"] = True
         context["normal_mode"] = True
+        user = self.request.user
+        if user.groups.filter(name="manager").exists() or user.is_superuser:
+            context["manager"] = True
         return context
 
 
@@ -419,7 +422,7 @@ class MailingStartView(View):
         if mailing.status != "created":
             messages.error(request, f"Рассылка со статусом {mailing.status} не может быть запущена повторно.")
             return redirect("distribution:mailing_detail", pk=pk)
-        if mailing.message.author != user:
+        if not isinstance(user, CustomUser) or mailing.message.author != user or user.is_blocked:
             raise PermissionDenied
         if USE_CELERY:
             shared_send_mailing_task.delay(pk)

@@ -39,8 +39,11 @@
         </div>
     </div>
     {% if normal_mode %}
+        {% if object.message.author.is_blocked %}
+            <h5 class="mt-5 sp-bfc">В настоящий момент ваш аккаунт заблокирован. Вы не можете запускать свои рассылки. Обратитесь к администрации сайта для уточнения причин блокировки.</h5>
+        {% endif %}
         <div class="d-flex gap-3 my-5">
-            {% if ready and object.message.author == user %}
+            {% if ready and object.message.author == user and not object.message.author.is_blocked %}
                 <form method="post" action="{% url 'distribution:start_mailing' pk=object.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="p-2 m-2 sp-start-but sp-bfc text-center fs-5">Запустить</button>
@@ -61,6 +64,12 @@
             {% endif %}
             {% if object.status != 'started' and object.message.author == user %}
                 <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_mailing' pk=object.pk %}">Удалить</a>
+            {% endif %}
+            {% if manager and not object.message.author.is_blocked %}
+                <form method="post" enctype="multipart/form-data" action="{% url 'users:block_from_mailing' pk=object.message.author.pk mailing_pk=object.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5">Заблокировать отправителя</button>
+                </form>
             {% endif %}
         </div>
     {% elif confirm_delete %}

@@ -5,13 +5,14 @@ from . import views
 from .apps import UsersConfig
 from .forms import CustomUserLoginForm
 from .views import (
+    CustomUserChangeBlockedStatusView,
     CustomUserDeleteView,
+    CustomUserListView,
     CustomUserPasswordChangeView,
     CustomUserPasswordRemakeView,
     CustomUserPasswordResetView,
     CustomUserProfileView,
     CustomUserUpdateView,
-    CustomUserListView,
 )
 
 app_name = UsersConfig.name
@@ -28,4 +29,10 @@ urlpatterns: list = [
     path("password_reset/", CustomUserPasswordResetView.as_view(), name="password_reset"),
     path("password_remake/<uidb64>/<token>/", CustomUserPasswordRemakeView.as_view(), name="password_remake"),
     path("list/", CustomUserListView.as_view(), name="users_list"),
+    path(
+        "block_switch/<int:pk>/<int:mailing_pk>/",
+        CustomUserChangeBlockedStatusView.as_view(),
+        name="block_from_mailing",
+    ),
+    path("block_switch/<int:pk>/", CustomUserChangeBlockedStatusView.as_view(), name="block_from_users_list"),
 ]

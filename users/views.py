@@ -13,7 +13,7 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, ListView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from distribution.services import distribution_logger
 
@@ -194,3 +194,28 @@ class CustomUserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = CustomUser
     permission_required = ("view_customuser",)
 
+
+class CustomUserChangeBlockedStatusView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """Контроллер функции изменения статуса блокировки пользователя"""
+
+    permission_required = ("users.block_customuser", "users.unblock_customuser")
+
+    def post(self, request: HttpRequest, pk: int, mailing_pk: Optional[int] = None) -> HttpResponse:
+        """Получение команды на изменение статуса блокировки пользователя"""
+
+        manager = request.user
+        user = get_object_or_404(CustomUser, pk=pk)
+        if mailing_pk is not None:
+            next_page = redirect("distribution:mailing_detail", pk=mailing_pk)
+        else:
+            next_page = redirect("users:users_list")
+        if manager == user:
+            messages.error(request, "Нельзя самостоятельно заблокировать или разблокировать собственный аккаунт")
+            return next_page
+        user.is_blocked = not user.is_blocked
+        user.save()
+        if user.is_blocked:
+            distribution_logger.warning(f"Пользователь с e-mail {user.email} заблокирован.")
+        else:
+            distribution_logger.info(f"Пользователь с e-mail {user.email} разблокирован.")
+        return next_page

@@ -20,6 +20,7 @@ class CustomUser(AbstractUser):
         blank=True,
     )
     is_active = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False)
 
     class Meta:
         """Настройки отображения"""
