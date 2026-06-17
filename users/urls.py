@@ -40,5 +40,5 @@ urlpatterns: list = [
     path("block_switch/<int:pk>/", CustomUserChangeBlockedStatusView.as_view(), name="block_from_users_list"),
     path("set_group/<int:pk>/", SetCustomUserGroupView.as_view(), name="set_group"),
     path("groups/", GroupListView.as_view(), name="groups"),
-    path("assign/<int:pk>/", AssignGroupView.as_view(), name="assign"),
+    path("assign/<int:pk>/<action>/", AssignGroupView.as_view(), name="assign"),
 ]

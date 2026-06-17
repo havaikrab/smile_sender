@@ -10,8 +10,8 @@
             {% for group in object_list %}
                 <div class="sp-bfc sp-link-row mt-2 d-flex gap-3" onclick="window.location.href='#'">
                     <h3>{{group.name}}</h3>
-                    <a class="m-1 p-1 sp-nav-but sp-bfc text-center fs-5" href="{% url 'users:assign' pk=group.pk %}">Добавить пользователей</a>
-                    <a class="m-1 p-1 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:mailing_management' %}">Исключить пользователей</a>
+                    <a class="m-1 p-1 sp-nav-but sp-bfc text-center fs-5" href="{% url 'users:assign' pk=group.pk action='assign' %}">Добавить пользователей</a>
+                    <a class="m-1 p-1 sp-nav-but sp-bfc text-center fs-5" href="{% url 'users:assign' pk=group.pk action='exclude' %}">Исключить пользователей</a>
                 </div>
             {% endfor %}
         </div>

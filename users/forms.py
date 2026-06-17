@@ -220,12 +220,16 @@ class AssignGroupForm(Form):
         """Стилизация формы"""
 
         users_list = kwargs.pop("users_list")
+        view_action = kwargs.pop("view_action")
         super(AssignGroupForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.fields["users"].queryset = users_list  # type: ignore
         users_field = Field("users", css_class="sp-check-scroll")
-        submit_button = Submit("submit", "Назначить")
+        if view_action == "assign":
+            submit_button = Submit("submit", "Назначить")
+        else:
+            submit_button = Submit("submit", "Исключить")
         submit_button.field_classes = "p-2 sp-nav-but sp-bfc text-center fs-5"
         cancel_url = reverse("users:groups")
         cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')

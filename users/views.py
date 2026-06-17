@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, AnonymousUser, Group
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordChangeView, PasswordResetConfirmView, PasswordResetView
 from django.db.models import QuerySet
-from django.http import HttpRequest
+from django.http import Http404, HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -270,28 +270,46 @@ class AssignGroupView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
 
         group_id = self.kwargs.get("pk")
         self.group = get_object_or_404(Group, id=group_id)
+        view_action = self.kwargs.get("action")
+        if view_action == "assign":
+            self.view_action = "assign"
+        elif view_action == "exclude":
+            self.view_action = "exclude"
+        else:
+            raise Http404
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict:
         """Передача в шаблон заголовка страницы"""
 
         context = super().get_context_data(**kwargs)
-        context["header"] = f"Добавление пользователей в группу {self.group.name}"
+        if self.view_action == "assign":
+            context["header"] = f"Добавление пользователей в группу {self.group.name}"
+        else:
+            context["header"] = f"Исключение пользователей из группы {self.group.name}"
         return context
 
     def get_form_kwargs(self) -> dict:
         """Передача в форму списка пользователей, не состоящих в группе"""
 
         kwargs = super().get_form_kwargs()
-        kwargs["users_list"] = CustomUser.objects.exclude(groups=self.group)
+        if self.view_action == "assign":
+            kwargs["users_list"] = CustomUser.objects.exclude(groups=self.group)
+            kwargs["view_action"] = "assign"
+
+        else:
+            kwargs["users_list"] = self.group.user_set.all()
+            kwargs["view_action"] = "exclude"
         return kwargs
 
     def form_valid(self, form: SetCustomUserGroupForm) -> HttpResponse:
         """Определение пользователя в выбранные группы персонала"""
 
-        assigned_users = form.cleaned_data.get("users")
-        users_ids = list()
-        if isinstance(assigned_users, QuerySet):
-            users_ids = list(assigned_users.values_list("id", flat=True))
-        self.group.user_set.add(*users_ids)
+        selected_users = form.cleaned_data.get("users")
+        if isinstance(selected_users, QuerySet):
+            users_ids = list(selected_users.values_list("id", flat=True))
+            if self.view_action == "assign":
+                self.group.user_set.add(*users_ids)
+            else:
+                self.group.user_set.remove(*users_ids)
         return redirect("users:groups")
