@@ -12,6 +12,6 @@
         <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'users:users_list' %}">Пользователи</a>
     {% endif %}
     {% if user.is_superuser %}
-        <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:messages' %}">Персонал</a>
+        <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'users:groups' %}">Персонал</a>
     {% endif %}
 </div>

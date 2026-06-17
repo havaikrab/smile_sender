@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Группы персонала</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="sp-cont p-3 me-5 mt-5">
+            {% for group in object_list %}
+                <div class="sp-bfc sp-link-row mt-2 d-flex gap-3" onclick="window.location.href='#'">
+                    <h3>{{group.name}}</h3>
+                    <a class="m-1 p-1 sp-nav-but sp-bfc text-center fs-5" href="{% url 'users:assign' pk=group.pk %}">Добавить пользователей</a>
+                    <a class="m-1 p-1 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:mailing_management' %}">Исключить пользователей</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

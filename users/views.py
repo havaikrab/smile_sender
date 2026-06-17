@@ -4,12 +4,12 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser, Group
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordChangeView, PasswordResetConfirmView, PasswordResetView
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from django.http.response import HttpResponse, HttpResponseRedirect
+from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -18,6 +18,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 from distribution.services import distribution_logger
 
 from .forms import (
+    AssignGroupForm,
     CustomUserCreationForm,
     CustomUserDeleteForm,
     CustomUserPasswordChangeForm,
@@ -222,13 +223,20 @@ class CustomUserChangeBlockedStatusView(LoginRequiredMixin, PermissionRequiredMi
         return next_page
 
 
-class SetCustomUserGroupView(LoginRequiredMixin, PermissionRequiredMixin, CheckManagerMixin, FormView):
+class SetCustomUserGroupView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
     """Контроллер страницы добавления пользователя в определенную группу персонала"""
 
     form_class = SetCustomUserGroupForm
     template_name = "users/set_user_group.html"
     success_url = reverse_lazy("users:users_list")
     permission_required = ("auth.change_group",)
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Передача в шаблон заголовка страницы"""
+
+        context = super().get_context_data(**kwargs)
+        context["header"] = "Назначение пользователя на должность"
+        return context
 
     def form_valid(self, form: SetCustomUserGroupForm) -> HttpResponse:
         """Определение пользователя в выбранные группы персонала"""
@@ -239,3 +247,51 @@ class SetCustomUserGroupView(LoginRequiredMixin, PermissionRequiredMixin, CheckM
         if isinstance(groups, QuerySet):
             user.groups.add(*groups)
         return redirect("users:users_list")
+
+
+class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    """Контроллер страницы списка групп пользователей"""
+
+    model = Group
+    template_name = "users/group_list.html"
+    permission_required = ("auth.view_group",)
+
+
+class AssignGroupView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
+    """Контроллер страницы добавления нескольких пользователей в определенную группу"""
+
+    form_class = AssignGroupForm
+    template_name = "users/set_user_group.html"
+    success_url = reverse_lazy("users:users_list")
+    permission_required = ("auth.change_group",)
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        """Сохранение объекта группы в атрибут класса"""
+
+        group_id = self.kwargs.get("pk")
+        self.group = get_object_or_404(Group, id=group_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Передача в шаблон заголовка страницы"""
+
+        context = super().get_context_data(**kwargs)
+        context["header"] = f"Добавление пользователей в группу {self.group.name}"
+        return context
+
+    def get_form_kwargs(self) -> dict:
+        """Передача в форму списка пользователей, не состоящих в группе"""
+
+        kwargs = super().get_form_kwargs()
+        kwargs["users_list"] = CustomUser.objects.exclude(groups=self.group)
+        return kwargs
+
+    def form_valid(self, form: SetCustomUserGroupForm) -> HttpResponse:
+        """Определение пользователя в выбранные группы персонала"""
+
+        assigned_users = form.cleaned_data.get("users")
+        users_ids = list()
+        if isinstance(assigned_users, QuerySet):
+            users_ids = list(assigned_users.values_list("id", flat=True))
+        self.group.user_set.add(*users_ids)
+        return redirect("users:groups")

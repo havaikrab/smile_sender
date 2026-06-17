@@ -5,6 +5,7 @@ from . import views
 from .apps import UsersConfig
 from .forms import CustomUserLoginForm
 from .views import (
+    AssignGroupView,
     CustomUserChangeBlockedStatusView,
     CustomUserDeleteView,
     CustomUserListView,
@@ -13,6 +14,7 @@ from .views import (
     CustomUserPasswordResetView,
     CustomUserProfileView,
     CustomUserUpdateView,
+    GroupListView,
     SetCustomUserGroupView,
 )
 
@@ -37,4 +39,6 @@ urlpatterns: list = [
     ),
     path("block_switch/<int:pk>/", CustomUserChangeBlockedStatusView.as_view(), name="block_from_users_list"),
     path("set_group/<int:pk>/", SetCustomUserGroupView.as_view(), name="set_group"),
+    path("groups/", GroupListView.as_view(), name="groups"),
+    path("assign/<int:pk>/", AssignGroupView.as_view(), name="assign"),
 ]

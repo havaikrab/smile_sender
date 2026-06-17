@@ -38,17 +38,17 @@
                         </td>
                         <td style="padding: 5px">Группы</td>
                         <td style="padding: 5px">
-                            <div class="my-3">
+                            <div class="my-3 d-flex flex-column">
                                 <form method="post" enctype="multipart/form-data" action="{% url 'users:block_from_users_list' pk=object.pk %}">
                                     {% csrf_token %}
                                     {% if object.is_blocked %}
-                                        <button type="submit" class="py-1 px-3 my-3 sp-start-but sp-bfc text-center fs-6">Разблокировать</button>
+                                        <button type="submit" class="py-1 px-3 my-1 sp-start-but sp-bfc text-center fs-6 w-100">Разблокировать</button>
                                     {% else %}
-                                        <button type="submit" class="py-1 px-3 my-3 sp-dngr-but sp-bfc text-center fs-6">Заблокировать</button>
+                                        <button type="submit" class="py-1 px-3 my-1 sp-dngr-but sp-bfc text-center fs-6 w-100">Заблокировать</button>
                                     {% endif %}
                                 </form>
                                 {% if user.is_superuser %}
-                                    <a class="py-1 px-3 my-3 sp-nav-but sp-bfc text-center fs-6" href="{% url 'users:set_group' pk=object.pk %}">Назначить</a>
+                                    <a class="py-1 px-3 my-1 sp-nav-but sp-bfc text-center fs-6 w-100" href="{% url 'users:set_group' pk=object.pk %}">Назначить</a>
                                 {% endif %}
                             </div>
                         </td>

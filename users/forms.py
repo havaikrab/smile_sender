@@ -204,3 +204,30 @@ class SetCustomUserGroupForm(Form):
         cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
         buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3 mt-5")
         self.helper.layout = Layout(groups, buttons_div)
+
+
+class AssignGroupForm(Form):
+    """Форма выбора пользователей для добавления в группу"""
+
+    users = ModelMultipleChoiceField(
+        queryset=CustomUser.objects.none(),
+        widget=CheckboxSelectMultiple(attrs={"size": "10"}),
+        required=True,
+        label="Пользователи",
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Стилизация формы"""
+
+        users_list = kwargs.pop("users_list")
+        super(AssignGroupForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.fields["users"].queryset = users_list  # type: ignore
+        users_field = Field("users", css_class="sp-check-scroll")
+        submit_button = Submit("submit", "Назначить")
+        submit_button.field_classes = "p-2 sp-nav-but sp-bfc text-center fs-5"
+        cancel_url = reverse("users:groups")
+        cancel_button = HTML(f'<a href="{cancel_url}" class="p-2 sp-nav-but sp-bfc text-center fs-5">Отмена</a>')
+        buttons_div = Div(submit_button, cancel_button, css_class="d-flex gap-3 mt-5")
+        self.helper.layout = Layout(users_field, buttons_div)
