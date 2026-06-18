@@ -117,6 +117,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 REDIS_URL = "redis://" + os.getenv("REDIS_HOST", "127.0.0.1") + ":" + os.getenv("REDIS_PORT", "6379") + "/"
 CACHE_DB = os.getenv("CACHE_DB", "1")
+BASE_TTL = int(os.getenv("BASE_TTL", 600))
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": f"{REDIS_URL}{CACHE_DB}"}}
 
@@ -126,5 +127,5 @@ CELERY_BROKER_URL = f"{REDIS_URL}{CELERY_BROKER_DB}"
 CELERY_RESULT_DB = os.getenv("CELERY_RESULT_DB", "3")
 CELERY_RESULT_BACKEND = f"{REDIS_URL}{CELERY_RESULT_DB}"
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_TASK_TRACK_STARTED = os.getenv("CELERY_TASK_TRACK_STARTED", "") == "true"
+CELERY_TASK_TRACK_STARTED = os.getenv("CELERY_TASK_TRACK_STARTED", "").lower() == "true"
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 3600))

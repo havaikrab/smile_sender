@@ -16,7 +16,7 @@ from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from config.settings import EMAIL_HOST_USER
+from config.settings import BASE_TTL, EMAIL_HOST_USER
 from distribution.models import Attempt, Mailing, Recipient
 from users.models import CustomUser
 
@@ -97,36 +97,6 @@ class ExcelManager:
                 added_customers.append(customer)
                 self.report["success_operations"].append(f"Добавлен получатель с email {customer.email}.")
         self.__user.customers.add(*added_customers)
-
-        #
-        # existing_emails = list(Recipient.objects.all().values_list("email", flat=True))
-        # user_emails = list(self.__user.customers.all().values_list("email", flat=True))
-        # uploaded_emails = set([self.__sheet[f"A{row}"].value for row in range(2, self.__sheet.max_row + 1)])
-        # uploaded_emails.discard(None)
-        # uploaded_emails.discard("")
-        # new_emails = uploaded_emails.difference(existing_emails)
-        # valid_recipients = list()
-        # for row in range(2, self.__sheet.max_row + 1):
-        #     recipient_dict = {v: self.__sheet[f"{k}{row}"].value for k, v in ExcelManager.__columns.items()}
-        #     row_email = recipient_dict["email"]
-        #     if row_email in new_emails:
-        #         try:
-        #             recipient = Recipient(**recipient_dict)
-        #             recipient.full_clean()
-        #             valid_recipients.append(recipient)
-        #             self.report["success_operations"].append(
-        #                 f"Получатель №{row} с email {row_email} добавлен в базу данных"
-        #             )
-        #         except ValidationError:
-        #             self.report["invalid_rows"].append(str(row))
-        #         new_emails.discard(row_email)
-        #     else:
-        #         if row_email is not None and row_email != "":
-        #             self.report["existing_objects"].append(
-        #                 f"Получатель №{row} с email {row_email} уже существует в базе данных"
-        #             )
-        # Recipient.objects.bulk_create(valid_recipients, ignore_conflicts=True)
-        # return valid_recipients
 
     @staticmethod
     def send_excel_form() -> FileResponse:
@@ -277,3 +247,17 @@ def get_statistics(user: AbstractBaseUser | AnonymousUser) -> dict:
         failed_attempts = users_attempts.filter(status="fail")
         grouped_context["failed_attempts"] = len(failed_attempts)
     return grouped_context
+
+
+def get_cached_statistics(user: AbstractBaseUser | AnonymousUser) -> dict:
+    """Кеширует статистику рассылок"""
+
+    if isinstance(user, CustomUser):
+        key = f"{user.pk}_statistics"
+    else:
+        key = "base_statistics"
+    statistics: dict = cache.get(key)
+    if statistics is None:
+        statistics = get_statistics(user)
+        cache.add(key, statistics, BASE_TTL)
+    return statistics

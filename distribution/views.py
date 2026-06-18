@@ -20,7 +20,7 @@ from users.services import CheckManagerMixin
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
-from .services import ExcelManager, execute_mailing, get_statistics, group_context
+from .services import ExcelManager, execute_mailing, get_cached_statistics, group_context
 from .tasks import shared_send_mailing_task
 
 
@@ -34,7 +34,7 @@ class HomeView(CheckManagerMixin, TemplateView):
 
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context.update(get_statistics(user))
+        context.update(get_cached_statistics(user))
         return context
 
 

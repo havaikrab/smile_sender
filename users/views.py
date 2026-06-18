@@ -258,7 +258,7 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
 
 class AssignGroupView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
-    """Контроллер страницы добавления нескольких пользователей в определенную группу"""
+    """Контроллер страниц добавления или исключения нескольких пользователей в определенную группу"""
 
     form_class = AssignGroupForm
     template_name = "users/set_user_group.html"
@@ -290,7 +290,7 @@ class AssignGroupView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
         return context
 
     def get_form_kwargs(self) -> dict:
-        """Передача в форму списка пользователей, не состоящих в группе"""
+        """Передача в форму соответствующего списка пользователей, состоящих или не состоящих в выбранной группе"""
 
         kwargs = super().get_form_kwargs()
         if self.view_action == "assign":
@@ -303,7 +303,7 @@ class AssignGroupView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form: SetCustomUserGroupForm) -> HttpResponse:
-        """Определение пользователя в выбранные группы персонала"""
+        """Добавление в группу или удаление из нее выбранных пользователей"""
 
         selected_users = form.cleaned_data.get("users")
         if isinstance(selected_users, QuerySet):
