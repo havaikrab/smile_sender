@@ -6,11 +6,63 @@ authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<4.0"
 dependencies = [
+    "django (>=6.0.5,<7.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "pillow (>=12.2.0,<13.0.0)",
+    "redis (>=7.4.0,<8.0.0)",
+    "ipython (>=9.13.0,<10.0.0)",
+    "django-crispy-forms (>=2.6,<3.0)",
+    "crispy-bootstrap5 (>=2026.3,<2027.0)",
+    "django-stubs (>=6.0.4,<7.0.0)",
+    "openpyxl (>=3.1.5,<4.0.0)",
+    "types-openpyxl (>=3.1.5.20260518,<4.0.0.0)",
+    "celery (>=5.6.3,<6.0.0)",
+    "celery-types (>=0.26.0,<0.27.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+lint = [
+    "isort (>=8.0.1,<9.0.0)",
+    "black (>=26.3.1,<27.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
+    "mypy (>=2.1.0,<3.0.0)"
+]
+
+[tool.isort]
+line_length = 119
+lines_after_imports = 2
+
+[tool.black]
+line-length = 119
+exclude = '''
+/(
+\.venv|
+\.git|
+\.mypy_cache|
+\.pytest_cache|
+build|
+dist
+venv
+)/
+'''
+
+[tool.mypy]
+disallow_untyped_defs = true
+warn_return_any = true
+exclude_gitignore = true
+plugins = ["mypy_django_plugin.main"]
+
+[[tool.mypy.overrides]]
+module = ["crispy_forms.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings"

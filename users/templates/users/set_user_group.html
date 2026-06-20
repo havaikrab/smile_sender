@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">{{ header }}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <form class="col-7 sp-cont px-5 py-4 mt-5 me-5 sp-bfc" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+{% endblock %}

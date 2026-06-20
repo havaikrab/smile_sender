@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block header %}
+        <h1 class="text-center sp-bfc mt-5 fw-bold">Рассылка №{{object.pk}}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="sp-cont me-5 mt-5">
+        {% if ready %}
+            <span class="badge rounded-pill text-bg-success m-3">Готова к запуску</span>
+        {% elif object.status == 'created' and not ready %}
+            <span class="badge rounded-pill text-bg-warning m-3">Подготовлена</span>
+        {% elif object.status == 'started' %}
+            <span class="badge rounded-pill text-bg-primary m-3">Запущена</span>
+        {% else %}
+            <span class="badge rounded-pill text-bg-secondary m-3">Завершена</span>
+        {% endif %}
+        <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Тема:</h5>
+            <h6 class="col-10 sp-bfc sp-frame fw-bold">{{object.message.title}}</h6>
+        </div>
+        <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Сообщение:</h5>
+            <h6 class="col-10 sp-bfc sp-frame">{{object.message.content}}</h6>
+        </div>
+        <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Период:</h5>
+            <h6 class="col-10 sp-bfc my-2">
+                С <span class="sp-frame fs-5">{{object.start_time}}</span> ПО <span class="sp-frame fs-5">{{object.end_time}}</span>
+            </h6>
+        </div>
+                <div class="row m-3">
+            <h5 class="col-2 sp-bfc fw-bold text-end">Получатели:</h5>
+            <div class="col-10 sp-bfc sp-check-scroll">
+                {% for recipient in object.recipients.all %}
+                    <p>{{recipient}}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% if normal_mode %}
+        {% if object.message.author.is_blocked %}
+            <h5 class="mt-5 sp-bfc">В настоящий момент ваш аккаунт заблокирован. Вы не можете запускать свои рассылки. Обратитесь к администрации сайта для уточнения причин блокировки.</h5>
+        {% endif %}
+        <div class="d-flex gap-3 my-5">
+            {% if ready and object.message.author == user and not object.message.author.is_blocked %}
+                <form method="post" action="{% url 'distribution:start_mailing' pk=object.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 m-2 sp-start-but sp-bfc text-center fs-5">Запустить</button>
+                </form>
+            {% endif %}
+            {% if object.status == 'created' and object.message.author == user %}
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:update_mailing' pk=object.pk %}">Редактировать</a>
+            {% endif %}
+            {% if stop_button %}
+                {% if object.message.author == user or perms.distribution.stop_mailing %}
+                    <form method="post" action="{% url 'distribution:stop_mailing' pk=object.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5">Остановить</button>
+                    </form>
+                {% endif %}
+            {% elif not stop_button and object.status == 'started' %}
+                <h5 class="sp-bfc">Рассылка завершена, статус обновится в ближайшее время</h5>
+            {% endif %}
+            {% if object.status != 'started' and object.message.author == user %}
+                <a class="p-2 m-2 sp-dngr-but sp-bfc text-center fs-5" href="{% url 'distribution:delete_mailing' pk=object.pk %}">Удалить</a>
+            {% endif %}
+            {% if manager and not object.message.author.is_blocked %}
+                <form method="post" enctype="multipart/form-data" action="{% url 'users:block_from_mailing' pk=object.message.author.pk mailing_pk=object.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 m-2 sp-stop-but sp-bfc text-center fs-5">Заблокировать отправителя</button>
+                </form>
+            {% endif %}
+        </div>
+    {% elif confirm_delete %}
+        <h5 class="sp-bfc my-4">Вы действительно хотите удалить данную рассылку?</h5>
+        <form method="post" class='mb-5' enctype="multipart/form-data" style="display: flex">
+            {% csrf_token %}
+            <button type="submit" class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-5">Удалить</button>
+            <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:mailing_detail' pk=object.pk %}">Отмена</a>
+        </form>
+    {% endif %}
+{% endblock %}

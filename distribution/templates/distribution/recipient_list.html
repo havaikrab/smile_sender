@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список получателей рассылок</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="mt-5 row me-5">
+        <div class="col-7">
+            <div class="mb-5">
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:create_single_recipient' %}">Добавить получателя</a>
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:upload_recipients' %}">Загрузить список контактов</a>
+            </div>
+        </div>
+        <div class="col-5 sp-cont align-self-start p-2">
+            <h5 class="text-center sp-bfc m-3">Excel-форма</h5>
+            <ul class="text-start sp-bfc m-1">
+                <li>Скачайте данную форму</li>
+                <li>Заполните форму информацией о получателях</li>
+                <li>Нажмите кнопку "Загрузить список контактов"</li>
+                <li>Прикрепите обновленный файл и нажмите "Отправить"</li>
+                <li>Новые контакты станут доступны в таблице выше</li>
+            </ul>
+            <div class="text-center m-3">
+                <a class="p-2 m-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:download_recipients_form' %}">Скачать</a>
+            </div>
+        </div>
+    </div>
+    <div class="sp-cont p-3 me-5 mt-5">
+        <table class="sp-bfc" style="width:100%">
+            <thead>
+                <tr class="text-start sp-bfc" style="border-bottom: 3px solid rgb(80, 200, 20)">
+                    <th scope="col" style="width:14%; padding: 10px">E-mail</th>
+                    <th scope="col" style="width:14%; padding: 10px">Фамилия</th>
+                    <th scope="col" style="width:14%; padding: 10px">Имя</th>
+                    <th scope="col" style="width:14%; padding: 10px">Отчество</th>
+                    <th scope="col" style="width:14%; padding: 10px">Комментарии</th>
+                    {% if not management %}
+                        <th scope="col" style="width:30%; padding: 10px">Действия</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for recipient in object_list %}
+                    <tr class="text-start sp-bfc" style="border-bottom: 1px solid rgba(80, 200, 20, 0.2)">
+                        <td style="padding: 10px">{{recipient.email}}</td>
+                        <td style="padding: 10px">{{recipient.last_name|default:""}}</td>
+                        <td style="padding: 10px">{{recipient.first_name|default:""}}</td>
+                        <td style="padding: 10px">{{recipient.middle_name|default:""}}</td>
+                        <td style="padding: 10px">{{recipient.comment|default:""}}</td>
+                        {% if not management %}
+                            <td style="padding: 10px">
+                                <a class="py-1 px-3 m-2 sp-nav-but sp-bfc text-center fs-6" href="{% url 'distribution:update_recipient' pk=recipient.pk %}">Изменить</a>
+                                <a class="py-1 px-3 m-2 sp-dngr-but sp-bfc text-center fs-6" href="{% url 'distribution:delete_recipient' pk=recipient.pk %}">Удалить</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

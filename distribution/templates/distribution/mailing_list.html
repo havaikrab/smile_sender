@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center sp-bfc mt-5 fw-bold">Список рассылок</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <a class="p-2 sp-nav-but sp-bfc text-center fs-5" href="{% url 'distribution:create_mailing' %}">Создать новую рассылку</a>
+        <div class="sp-cont p-3 me-5 mt-5">
+            {% for mailing in sorted_objects.ready %}
+                <div class="sp-bfc sp-link-row my-2" onclick="window.location.href='{% url 'distribution:mailing_detail' pk=mailing.pk %}'">
+                    <h5>{{mailing.message}}</h5>
+                    <p>{{mailing.start_time}} - {{mailing.end_time}}</p>
+                    <span class="badge rounded-pill text-bg-success">Готова к запуску</span>
+                </div>
+            {% endfor %}
+            {% for mailing in sorted_objects.created %}
+                <div class="sp-bfc sp-link-row my-2" onclick="window.location.href='{% url 'distribution:mailing_detail' pk=mailing.pk %}'">
+                    <h5>{{mailing.message}}</h5>
+                    <p>{{mailing.start_time}} - {{mailing.end_time}}</p>
+                    <span class="badge rounded-pill text-bg-warning">Подготовлена</span>
+                </div>
+            {% endfor %}
+            {% for mailing in sorted_objects.started %}
+                <div class="sp-bfc sp-link-row my-2" onclick="window.location.href='{% url 'distribution:mailing_detail' pk=mailing.pk %}'">
+                    <h5>{{mailing.message}}</h5>
+                    <p>{{mailing.start_time}} - {{mailing.end_time}}</p>
+                    <span class="badge rounded-pill text-bg-primary">Запущена</span>
+                </div>
+            {% endfor %}
+            {% for mailing in sorted_objects.completed %}
+                <div class="sp-bfc sp-link-row my-2" onclick="window.location.href='{% url 'distribution:mailing_detail' pk=mailing.pk %}'">
+                    <h5>{{mailing.message}}</h5>
+                    <p>{{mailing.start_time}} - {{mailing.end_time}}</p>
+                    <span class="badge rounded-pill text-bg-secondary">Завершена</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

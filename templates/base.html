@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smile Sender</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/custom_style.css' %}" rel="stylesheet" type="text/css">
+</head>
+<body class="sp-gr-bckgrnd">
+    <div class="row">
+        <div class="col-2" style="color: red">
+            <img src="{% static 'icons/logo.svg' %}" alt="Логотип">
+        </div>
+        {% if user.is_authenticated %}
+            <div class="col-8">
+
+                {% block header %} {% endblock %}
+
+            </div>
+            <div class="col-2 d-flex flex-column sp-auth px-4 py-3">
+                <a class="p-2 my-3 sp-auth-but sp-bfc text-center fs-5" href="{% url 'users:profile' %}">Профиль</a>
+                <form method="post" action="{% url 'users:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit"  class="p-2 my-3 sp-auth-but sp-bfc text-center  fs-5" style="width:100%">Выйти</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="col-8">
+                <h1 class="text-center mt-5 fw-bold sp-bfc">Добро пожаловать в Smile Sender!</h1>
+                <h6 class="text-center m-3 fw-bold sp-bfc">Пожалуйста, авторизуйтесь, чтобы получить доступ к сервису массовых рассылок</h6>
+            </div>
+            <div class="col-2 d-flex flex-column sp-auth p-3">
+                <a class="p-2 m-3 sp-auth-but sp-bfc text-center  fs-5" href="{% url 'users:register' %}">Зарегистрироваться</a>
+                <a class="p-2 m-3 sp-auth-but sp-bfc text-center  fs-5" href="{% url 'users:login' %}">Войти</a>
+            </div>
+        {% endif %}
+    </div>
+    <hr class="my-4" style="border: none; height: 2px; background-color: green; opacity: 0.2;">
+    <div class="row me-0">
+        <div class="col-3">
+
+            {% include 'navigation.html' %}
+
+        </div>
+        <div class="col-9">
+            {% for message in messages %}
+                <p class="sp-msg-{{message.tags}}">{{message|linebreaksbr}}</p>
+            {% endfor %}
+
+            {% block content %}{% endblock %}
+
+        </div>
+    </div>
+    <hr class="my-4" style="border: none; height: 2px; background-color: green; opacity: 0.2;">
+    <footer class="sp-bfc ms-5 me-0 mb-5 row">
+        <div class="col-2">
+            <p class="m-0">Smile Sender</p>
+            <small class="text-muted m-0">&copy; 2026</small>
+        </div>
+        <div class="col">
+            <h3>Контактная информация</h3>
+            <div class="row">
+                <p class="col-1 m-0">GitHub:</p>
+                <a class="col m-0" href="https://github.com/havaikrab">github.com/havaikrab</a>
+            </div>
+            <div class="row">
+                <p class="col-1 m-0">E-mail:</p>
+                <p class="col m-0">havaikrab@gmail.com</p>
+            </div>
+        </div>
+    </footer>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

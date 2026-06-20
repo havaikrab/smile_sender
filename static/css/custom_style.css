@@ -1,0 +1,193 @@
+/* Меню авторизации */
+.sp-auth {
+    background: transparent;
+    background-size: cover;
+    border-left: 1px solid rgb(80, 200, 20);
+    border-bottom-left-radius: 20px;
+    border-bottom: 4px solid rgb(80, 200, 20);
+}
+
+
+/* Кнопки меню авторизации */
+.sp-auth-but {
+    color: brown;
+    background: rgb(150, 200, 255);
+    border-top: 1px solid rgb(50, 100, 255);
+    border-left: 3px solid rgb(50, 100, 255);
+    border-bottom: 3px solid rgb(50, 100, 255);
+    border-right: 1px solid rgb(50, 100, 255);
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-auth-but:hover {
+    box-shadow: -2px 2px 0 0 rgb(50, 100, 255);
+}
+
+
+/* Основной шрифт сайта */
+.sp-bfc, .form-text, .form-label, .form-select {
+    color: brown;
+    font-family: "Times New Roman", Times, serif;
+}
+.form-label {
+    font-size: 1.3rem !important;
+}
+
+
+/* Прокручиваемый список опций */
+.sp-check-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid rgb(80, 200, 20);
+    border-radius: 5px;
+    background: white;
+}
+
+
+/* Рамка основного содержимого страницы */
+.sp-cont {
+    background: transparent;
+    border-left: 1px solid rgb(80, 200, 20);
+    border-top: 1px solid rgb(80, 200, 20);
+    border-right: 4px solid rgb(80, 200, 20);
+    border-bottom: 4px solid rgb(80, 200, 20);
+    border-radius: 20px;
+    height: auto;
+}
+
+
+/* Опасная кнопка */
+.sp-dngr-but {
+    color: white;
+    background: rgb(255, 80, 80);
+    border-top: 1px solid rgb(255, 0, 0);
+    border-left: 1px solid rgb(255, 0, 0);
+    border-bottom: 3px solid rgb(255, 0, 0);
+    border-right: 3px solid rgb(255, 0, 0);
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-dngr-but:hover {
+    box-shadow: 2px 2px 0 0 rgb(255, 0, 0);
+}
+
+
+/* Второстепенная рамка, разделяющая разные блоки контента */
+.sp-frame {
+    background: white;
+    border: 1px solid rgba(80, 200, 20, 0.4);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+
+/* Фон с градиентом для базового шаблона */
+.sp-gr-bckgrnd {
+    background: linear-gradient(rgb(230, 255, 200), rgb(120, 220, 110));
+    background-attachment: fixed;
+    background-size: cover;
+    padding: 0;
+}
+
+
+/* Строка-ссылка */
+.sp-link-row {
+    background: transparent;
+    border: 2px solid rgba(150, 200, 255, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+}
+.sp-link-row:hover {
+    background: rgba(80, 200, 20, 0.1);
+}
+
+
+/* Шрифт сообщений об ошибках */
+.sp-msg-error {
+    color: red;
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Шрифт сообщений об успешных операциях */
+.sp-msg-success {
+    color: rgb(60, 180, 0);
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Шрифт предупреждений */
+.sp-msg-warning {
+    color: orange;
+    font-family: "Times New Roman", Times, serif;
+}
+
+
+/* Меню навигации */
+.sp-nav {
+    background: transparent;
+    border-top: 1px solid rgb(80, 200, 20);
+    border-top-right-radius: 20px;
+    border-right: 4px solid rgb(80, 200, 20);
+    border-bottom-right-radius: 20px;
+    border-bottom: 4px solid rgb(80, 200, 20);
+}
+
+
+/* Стандартная кнопка */
+.sp-nav-but {
+    color: brown;
+    background: rgb(150, 200, 255);
+    border-top: 1px solid rgb(50, 100, 255);
+    border-left: 1px solid rgb(50, 100, 255);
+    border-bottom: 3px solid rgb(50, 100, 255);
+    border-right: 3px solid rgb(50, 100, 255);
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-nav-but:hover {
+    box-shadow: 2px 2px 0 0 rgb(50, 100, 255);
+}
+
+
+/* Кнопка запуска процесса */
+.sp-start-but {
+    color: white;
+    background: rgb(30, 220, 10);
+    border-top: 1px solid green;
+    border-left: 1px solid green;
+    border-bottom: 3px solid green;
+    border-right: 3px solid green;
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-start-but:hover {
+    box-shadow: 2px 2px 0 0 green;
+}
+
+
+/* Кнопка остановки процесса */
+.sp-stop-but {
+    color: red;
+    background: rgb(255, 240, 40);
+    border-top: 1px solid red;
+    border-left: 1px solid red;
+    border-bottom: 3px solid red;
+    border-right: 3px solid red;
+    border-radius: 10px;
+    transition: box-shadow 0.1s ease;
+    text-decoration: none;
+    text: bold;
+}
+.sp-stop-but:hover {
+    box-shadow: 2px 2px 0 0 red;
+}

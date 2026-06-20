@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block header %}
+    {% if object %}
+        <h1 class="text-center sp-bfc mt-5 fw-bold">Редактирование рассылки №{{object.pk}}</h1>
+    {% else %}
+        <h1 class="text-center sp-bfc mt-5 fw-bold">Новая рассылка</h1>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <form class="col-7 sp-cont px-5 py-4 mt-5 me-5 sp-bfc" method="post">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+{% endblock %}
