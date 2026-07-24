@@ -25,6 +25,8 @@ services:
     celery_worker:
         build: .
         command: celery -A config worker --loglevel=info
+        env_file:
+            - .env
         environment:
             - DJANGO_SETTINGS_MODULE=config.settings
             - CELERY_BROKER_URL=redis://redis:6379/2
