@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", get_random_secret_key())
 
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 
-DEBUG = False
+DEBUG = os.getenv("DEBUG", 'false').lower() == 'true'
 
 ALLOWED_HOSTS: list = ["*"]
 
@@ -125,3 +125,5 @@ CELERY_RESULT_BACKEND = "redis://redis:6379/3"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = os.getenv("CELERY_TASK_TRACK_STARTED", "").lower() == "true"
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 3600))
+
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
