@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
     db:
         image: postgres:16
@@ -29,8 +27,8 @@ services:
         command: celery -A config worker --loglevel=info
         environment:
             - DJANGO_SETTINGS_MODULE=config.settings
-            - CELERY_BROKER_URL=redis://redis:6379/1
-            - CELERY_RESULT_BACKEND=redis://redis:6379/2
+            - CELERY_BROKER_URL=redis://redis:6379/2
+            - CELERY_RESULT_BACKEND=redis://redis:6379/3
         depends_on:
             db:
                 condition: service_healthy
@@ -53,7 +51,7 @@ services:
             redis:
                 condition: service_healthy
         command: >
-            sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+            sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     nginx:
         build:
             context: ./nginx
