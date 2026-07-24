@@ -14,13 +14,12 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
-from config.settings import USE_CELERY
 from users.models import CustomUser
 from users.services import CheckManagerMixin
 
 from .forms import MailingForm, MessageForm, SingleRecipientForm, UploadRecipientListForm
 from .models import Mailing, Message, Recipient
-from .services import ExcelManager, execute_mailing, get_cached_statistics, group_context
+from .services import ExcelManager, get_cached_statistics, group_context
 from .tasks import shared_send_mailing_task
 
 
@@ -422,10 +421,7 @@ class MailingStartView(LoginRequiredMixin, View):
             return redirect("distribution:mailing_detail", pk=pk)
         if not isinstance(user, CustomUser) or mailing.message.author != user or user.is_blocked:
             raise PermissionDenied
-        if USE_CELERY:
-            shared_send_mailing_task.delay(pk)
-        else:
-            execute_mailing(pk)
+        shared_send_mailing_task.delay(pk)
         messages.success(request, f'Рассылка "{mailing.message.title}" запущена')
         return redirect("distribution:mailing_list", pk=pk)
 
