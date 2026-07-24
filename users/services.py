@@ -27,7 +27,7 @@ def send_activate_link(user: CustomUser) -> None:
     """Отправляет только что зарегистрировавшемуся пользователю ссылку для активации аккаунта"""
 
     token = default_token_generator.make_token(user)
-    activation_link = f"{SITE_URL}/{reverse('users:activate', kwargs={'pk': user.pk, 'token': token})}"
+    activation_link = f"{SITE_URL}{reverse('users:activate', kwargs={'pk': user.pk, 'token': token})}"
     message = f"""Вы зарегистрировались в Smile Sender, для активации аккаунта и первого логина перейдите по ссылке
 {activation_link}"""
     try:
