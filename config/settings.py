@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", get_random_secret_key())
 
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 
-DEBUG = os.getenv("DEBUG", "").lower() == "true"
+DEBUG = False
 
 ALLOWED_HOSTS: list = ["*"]
 
