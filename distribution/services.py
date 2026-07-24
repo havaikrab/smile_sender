@@ -165,9 +165,13 @@ def send_mails(mailing: Mailing) -> None:
     attempts_list = list()
     time_to_sleep = int(os.getenv("SENDING_INTERVAL", 300))
     key = f"continue_mailing_{mailing.pk}"
+    distribution_logger.warning(f"Ложная ошибка {key}")
     time_to_end = mailing.end_time - timezone.now()
+    distribution_logger.warning(f"Ложная ошибка {time_to_end}")
     time_to_life = time_to_end.total_seconds()
+    distribution_logger.warning(f"Ложная ошибка {time_to_life}")
     cache.add(key, "continue", time_to_life)
+    distribution_logger.warning(f"Ложная ошибка 123")
     for recipient in recipients:
         continue_mailing = cache.get(key)
         if continue_mailing == "continue":
