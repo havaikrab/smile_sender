@@ -155,7 +155,6 @@ class CustomUserPasswordResetForm(PasswordResetForm):
 
         reset_link = (
             SITE_URL
-            + "/"
             + reverse("users:password_remake", kwargs={"uidb64": context["uid"], "token": context["token"]})
         )
         message = f"Перейдите по данной ссылке и укажите новый пароль от аккаунта Smile Sender:\n {reset_link}"
