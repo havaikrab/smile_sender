@@ -159,13 +159,11 @@ def send_mails(mailing: Mailing) -> None:
     distribution_logger.info(f"Запущена рассылка id{mailing.pk}.")
     mailing.status = "started"
     mailing.save()
-    distribution_logger.warning(f"Ложная ошибка 1111111111111111 save")
     recipients = mailing.recipients.all()
     success_count = 0
     fail_count = 0
     attempts_list = list()
     time_to_sleep = int(os.getenv("SENDING_INTERVAL", 300))
-    distribution_logger.warning(f"Ложная ошибка {time_to_sleep} {type(time_to_sleep)}")
     key = f"continue_mailing_{mailing.pk}"
     time_to_end = mailing.end_time - timezone.now()
     time_to_life = time_to_end.total_seconds()

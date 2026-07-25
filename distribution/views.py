@@ -423,7 +423,7 @@ class MailingStartView(LoginRequiredMixin, View):
             raise PermissionDenied
         shared_send_mailing_task.delay(pk)
         messages.success(request, f'Рассылка "{mailing.message.title}" запущена')
-        return redirect("distribution:mailing_list", pk=pk)
+        return redirect("distribution:mailing_list")
 
 
 class MailingStopView(LoginRequiredMixin, View):
